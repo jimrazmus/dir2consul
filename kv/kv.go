@@ -1,5 +1,5 @@
 // Simple Key Value library built on a map[string]string
-package main
+package kv
 
 import (
 	"errors"
