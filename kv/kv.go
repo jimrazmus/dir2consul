@@ -1,4 +1,4 @@
-// Simple Key Value library built on a map[string]string
+// Package kv provides a simple key-value library
 package kv
 
 import (
@@ -9,20 +9,20 @@ import (
 // ErrNxKey error is returned when key does not exist
 var ErrNxKey = errors.New("key does not exist")
 
-// KVList struct provides key-value storage and a sync mutex
-type KVList struct {
+// List provides key-value storage and a sync mutex
+type List struct {
 	sync.RWMutex
 	kvs map[string]string
 }
 
-// NewKVList returns a new KVList
-func NewKVList() *KVList {
-	k := &KVList{kvs: make(map[string]string)}
+// NewList returns a new List
+func NewList() *List {
+	k := &List{kvs: make(map[string]string)}
 	return k
 }
 
 // Get returns the value associated with provided key or ErrNxKey
-func (k *KVList) Get(key string, _ string) (string, string, error) {
+func (k *List) Get(key string, _ string) (string, string, error) {
 	k.RLock()
 	defer k.RUnlock()
 	value, ok := k.kvs[key]
@@ -33,7 +33,7 @@ func (k *KVList) Get(key string, _ string) (string, string, error) {
 }
 
 // Keys returns a list of the keys
-func (k *KVList) Keys() []string {
+func (k *List) Keys() []string {
 	k.RLock()
 	defer k.RUnlock()
 	keys := make([]string, len(k.kvs))
@@ -46,7 +46,7 @@ func (k *KVList) Keys() []string {
 }
 
 // IsEmpty returns true if k is empty
-func (k *KVList) IsEmpty() bool {
+func (k *List) IsEmpty() bool {
 	k.RLock()
 	defer k.RUnlock()
 	if k.kvs == nil || len(k.kvs) == 0 {
@@ -56,7 +56,7 @@ func (k *KVList) IsEmpty() bool {
 }
 
 // Set stores the value associated with key
-func (k *KVList) Set(key string, value string) (string, string, error) {
+func (k *List) Set(key string, value string) (string, string, error) {
 	k.Lock()
 	defer k.Unlock()
 	k.kvs[key] = value
@@ -64,7 +64,7 @@ func (k *KVList) Set(key string, value string) (string, string, error) {
 }
 
 // Values returns a list of the values
-func (k *KVList) Values() []string {
+func (k *List) Values() []string {
 	k.RLock()
 	defer k.RUnlock()
 	values := make([]string, len(k.kvs))
