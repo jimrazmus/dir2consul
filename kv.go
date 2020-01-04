@@ -22,12 +22,12 @@ func NewKVList() *KVList {
 }
 
 // Get returns the value associated with provided key or ErrNxKey
-func (k *KVList) Get(key string, value string) (string, string, error) {
+func (k *KVList) Get(key string, _ string) (string, string, error) {
 	k.RLock()
 	defer k.RUnlock()
 	value, ok := k.kvs[key]
 	if !ok {
-		return "", "", ErrNxKey
+		return key, "", ErrNxKey
 	}
 	return key, value, nil
 }
