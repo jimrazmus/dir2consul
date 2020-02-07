@@ -12,22 +12,22 @@ var ErrNxKey = errors.New("key does not exist")
 // List provides key-value storage and a sync mutex
 type List struct {
 	sync.RWMutex
-	kvs map[string]string
+	kvs map[string][]byte
 }
 
 // NewList returns a new List
 func NewList() *List {
-	k := &List{kvs: make(map[string]string)}
+	k := &List{kvs: make(map[string][]byte)}
 	return k
 }
 
 // Get returns the value associated with provided key or ErrNxKey
-func (k *List) Get(key string, _ string) (string, string, error) {
+func (k *List) Get(key string, _ []byte) (string, []byte, error) {
 	k.RLock()
 	defer k.RUnlock()
 	value, ok := k.kvs[key]
 	if !ok {
-		return key, "", ErrNxKey
+		return key, nil, ErrNxKey
 	}
 	return key, value, nil
 }
@@ -56,7 +56,7 @@ func (k *List) IsEmpty() bool {
 }
 
 // Set stores the value associated with key
-func (k *List) Set(key string, value string) (string, string, error) {
+func (k *List) Set(key string, value []byte) (string, []byte, error) {
 	k.Lock()
 	defer k.Unlock()
 	k.kvs[key] = value
@@ -64,10 +64,10 @@ func (k *List) Set(key string, value string) (string, string, error) {
 }
 
 // Values returns a list of the values
-func (k *List) Values() []string {
+func (k *List) Values() [][]byte {
 	k.RLock()
 	defer k.RUnlock()
-	values := make([]string, len(k.kvs))
+	values := make([][]byte, len(k.kvs))
 	i := 0
 	for _, v := range k.kvs {
 		values[i] = v
