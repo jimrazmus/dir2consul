@@ -8,7 +8,26 @@ import (
 	"strings"
 
 	"github.com/jimrazmus/kv"
+	"github.com/spf13/viper"
 )
+
+// conditionally compile in or out the debug prints
+const debug = false
+
+var IgnoreDirs = strings.Split(getenv("IGNORE_DIRS", ".git"), ",")
+
+var FileTypes = strings.Split(getenv("FILE_TYPES", ".hcl,.ini,.properties,.toml,.yaml"), ",")
+
+var ConsulKeyPrefix = getenv("CONSUL_KEY_PREFIX", "")
+
+// getenv returns the environment value for the given key or the default value when not found
+func getenv(key string, _default string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return _default
+	}
+	return val
+}
 
 func main() {
 	// Get Keys from Disk
