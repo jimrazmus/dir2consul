@@ -35,15 +35,6 @@ var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
 // VaultToken is the token value used to access the Consul server
 var VaultToken = getenv("VAULT_TOKEN", "")
 
-// getenv returns the environment value for the given key or the default value when not found
-func getenv(key string, _default string) string {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return _default
-	}
-	return val
-}
-
 func main() {
 	log.Println("dir2consul starting with configuration:")
 	log.Println("D2C_CONSUL_KEY_PREFIX:", ConsulKeyPrefix)
