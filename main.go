@@ -24,8 +24,6 @@ var ConsulServerURL = getenv("D2C_CONSUL_SERVER", "http://localhost:8500")
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
 
-// var FileTypes = strings.Split(getenv("D2C_FILE_TYPES", ".hcl,.ini,.properties,.toml,.yaml"), ",")
-
 // IgnoreDirs is a comma delimited list of directories to ignore when walking the files
 var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
 
