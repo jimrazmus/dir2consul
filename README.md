@@ -10,8 +10,8 @@ dir2consul uses environment variables to override default configuration values. 
 
 * D2C_CONSUL_KEY_PREFIX is the path prefix to prepend to all consul keys. Default: ""
 * D2C_CONSUL_SERVER is the URL of the Consul server. Default: http://localhost:8500
-* D2C_DIRECTORY is the directory we should walk
-* D2C_IGNORE_DIRS is a comma delimited list of directory patterns to ignore when walking the file system. Reference filepath.Match for pattern syntax. Default: ".git"
+* D2C_DIRECTORY is the directory we should walk. Default: local
+* D2C_IGNORE_DIRS is a comma delimited list of directory patterns to ignore when walking the file system. Reference filepath.Match for pattern syntax. Default: .git
 * D2C_IGNORE_TYPES is a comma delimited list of file suffixes to ignore when walking the file system. Default: ""
 * VAULT_TOKEN is the token value used to access the Consul server. Default: ""
 
