@@ -125,7 +125,7 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 			return err
 		}
 
-		switch filepath.Ext(path) {
+		switch strings.ToLower(filepath.Ext(path)) {
 		case ".hcl":
 			return loadHclFile()
 		case ".ini":
