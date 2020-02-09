@@ -26,11 +26,11 @@ var Directory = getenv("D2C_DIRECTORY", "local")
 
 // var FileTypes = strings.Split(getenv("D2C_FILE_TYPES", ".hcl,.ini,.properties,.toml,.yaml"), ",")
 
-// IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the files
-var IgnoreTypes = strings.Split(getenv("D2C_IGNORE_TYPES", ""), ",")
-
 // IgnoreDirs is a comma delimited list of directories to ignore when walking the files
 var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
+
+// IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the files
+var IgnoreTypes = strings.Split(getenv("D2C_IGNORE_TYPES", ""), ",")
 
 // VaultToken is the token value used to access the Consul server
 var VaultToken = getenv("VAULT_TOKEN", "")
