@@ -1,7 +1,9 @@
 # Created by https://www.gitignore.io/api/go,macos,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=go,macos,visualstudiocode
 
+.env
 dir2consul
+local
 
 ### Go ###
 # Binaries for programs and plugins
