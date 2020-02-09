@@ -24,10 +24,10 @@ var ConsulServerURL = getenv("D2C_CONSUL_SERVER", "http://localhost:8500")
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
 
-// IgnoreDirs is a comma delimited list of directories to ignore when walking the files
+// IgnoreDirs is a comma delimited list of directory patterns to ignore when walking the file system
 var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
 
-// IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the files
+// IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the file system
 var IgnoreTypes = strings.Split(getenv("D2C_IGNORE_TYPES", ""), ",")
 
 // VaultToken is the token value used to access the Consul server
