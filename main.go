@@ -107,11 +107,11 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 			return err
 		}
 
-		if info.Mode().IsDir() && ignoreDir(path) {
+		if info.Mode().IsDir() && ignoreDir(path, IgnoreDirs) {
 			return filepath.SkipDir
 		}
 
-		if info.Mode().IsDir() || !info.Mode().IsRegular() || ignoreFile(path) {
+		if info.Mode().IsDir() || !info.Mode().IsRegular() || ignoreFile(path, IgnoreTypes) {
 			return nil
 		}
 
@@ -146,24 +146,28 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 	})
 }
 
-// ignoreDir returns true if the directory should be ignored
-func ignoreDir(path string) bool {
-	for _, dir := range IgnoreDirs {
-		if strings.HasPrefix(path, dir) {
+// ignoreDir returns true if the directory should be ignored. Reference filepath.Match for pattern syntax
+func ignoreDir(path string, ignoreDirs []string) bool {
+	for _, dir := range ignoreDirs {
+		match, err := filepath.Match(dir, path)
+		if err != nil {
+			log.Fatal(err) // xxx: better error message
+		}
+		if match {
 			return true
 		}
 	}
 	return false
 }
 
-// ignoreFile returns true if the file should be ignored based on matching the extension
-func ignoreFile(path string) bool {
-	ext := filepath.Ext(path)
-	if ext == "" {
+// ignoreFile returns true if the file should be ignored based on file extension matching
+func ignoreFile(path string, ignoreExtensions []string) bool {
+	pathExtension := filepath.Ext(path)
+	if pathExtension == "" {
 		return false
 	}
-	for _, ignoreExt := range IgnoreTypes {
-		if ext == ignoreExt {
+	for _, ignoreExtension := range ignoreExtensions {
+		if pathExtension == ignoreExtension {
 			return true
 		}
 	}
