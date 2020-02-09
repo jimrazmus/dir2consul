@@ -3,6 +3,7 @@
 
 .env
 dir2consul
+local
 
 ### Go ###
 # Binaries for programs and plugins
