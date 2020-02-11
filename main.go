@@ -18,8 +18,8 @@ const debug = true
 // ConsulKeyPrefix is the path prefix to prepend to all consul keys
 var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 
-// ConsulServerURL is the URL of the Nomad server that will handle job submissions
-var ConsulServerURL = getenv("D2C_CONSUL_SERVER", "http://localhost:8500")
+// ConsulServerURL is the URL of the Consul server kv store
+var ConsulServerURL = getenv("D2C_CONSUL_SERVER", "http://localhost:8500/v1/kv")
 
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
