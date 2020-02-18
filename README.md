@@ -1,5 +1,11 @@
 # dir2consul
 
+![Build](https://github.com/jimrazmus/dir2consul/workflows/Go/badge.svg?branch=master)
+[![CodeCov](https://codecov.io/gh/jimrazmus/dir2consul/branch/master/graph/badge.svg)](https://codecov.io/gh/jimrazmus/dir2consul)
+[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
+
+## Summary
+
 dir2consul mirrors a file directory to a Consul Key-Value (KV) Store
 
 A files path and name, with the file extension removed, becomes the Consul Key while the contents of the file are the Value. Note that mirroring is exact which includes removing any Consul Keys that are not present in the source files.
