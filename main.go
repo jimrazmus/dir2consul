@@ -124,18 +124,18 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 		}
 
 		switch strings.ToLower(filepath.Ext(path)) {
-		case ".hcl":
-			return loadHclFile()
-		case ".ini":
-			return loadIniFile()
-		case ".json":
-			return loadJsonFile()
-		case ".properties":
-			return loadPropertiesFile()
-		case ".toml":
-			return loadTomlFile()
-		case ".yaml":
-			return loadYamlFile()
+		// case ".hcl":
+		// 	return loadHclFile()
+		// case ".ini":
+		// 	return loadIniFile()
+		// case ".json":
+		// 	return loadJsonFile()
+		// case ".properties":
+		// 	return loadPropertiesFile()
+		// case ".toml":
+		// 	return loadTomlFile()
+		// case ".yaml":
+		// 	return loadYamlFile()
 		default:
 			kv.Set(elemKey, elemVal)
 		}
@@ -172,27 +172,27 @@ func ignoreFile(path string, ignoreExtensions []string) bool {
 	return false
 }
 
-func loadHclFile() error {
-	return nil
-}
+// func loadHclFile() error {
+// 	return nil
+// }
 
-func loadIniFile() error {
-	return nil
-}
+// func loadIniFile() error {
+// 	return nil
+// }
 
-func loadJsonFile() error {
-	// https://github.com/laszlothewiz/golang-snippets-examples/blob/master/walk-JSON-tree.go
-	return nil
-}
+// func loadJsonFile() error {
+// 	// https://github.com/laszlothewiz/golang-snippets-examples/blob/master/walk-JSON-tree.go
+// 	return nil
+// }
 
-func loadPropertiesFile() error {
-	return nil
-}
+// func loadPropertiesFile() error {
+// 	return nil
+// }
 
-func loadTomlFile() error {
-	return nil
-}
+// func loadTomlFile() error {
+// 	return nil
+// }
 
-func loadYamlFile() error {
-	return nil
-}
+// func loadYamlFile() error {
+// 	return nil
+// }
