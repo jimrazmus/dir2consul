@@ -76,7 +76,7 @@ func main() {
 
 	// Delete extra data from Consul
 	for _, key := range consulKeyValues.Keys() {
-		// TBD
+		log.Println("Delete:", key)
 	}
 
 }
