@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,15 +73,90 @@ func main() {
 		_, fb, _ := fileKeyValues.Get(key, nil)
 		_, cb, _ := consulKeyValues.Get(key, nil)
 		if bytes.Compare(fb, cb) != 0 {
-			log.Println("Upsert:", key)
+			err = consulPut(key, fb)
+			if err != nil {
+				log.Println("Failed consulPut:", err)
+			}
 		}
 	}
 
 	// Delete extra data from Consul
 	for _, key := range consulKeyValues.Keys() {
-		log.Println("Delete:", key)
+		_, _, err := fileKeyValues.Get(key, nil)
+		if err != nil {
+			err = consulDelete(key)
+			if err != nil {
+				log.Println("Failed consulDelete:", err)
+			}
+		}
 	}
 
+}
+
+func consulPut(key string, value []byte) error {
+	requestURL := ConsulServerURL
+	if len(ConsulKeyPrefix) > 0 {
+		requestURL = strings.Join([]string{requestURL, url.PathEscape(ConsulKeyPrefix)}, "/")
+	}
+	requestURL = strings.Join([]string{requestURL, url.PathEscape(key)}, "/")
+	if debug {
+		log.Println("requestUrl:", requestURL)
+	}
+
+	request, err := http.NewRequest("PUT", requestURL, bytes.NewBuffer(value))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if debug {
+		body, _ := ioutil.ReadAll(response.Body)
+		log.Println("response Body:", string(body))
+	}
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return errors.New(response.Status)
+	}
+
+	return nil
+}
+
+func consulDelete(key string) error {
+	requestURL := strings.Join([]string{ConsulServerURL, url.PathEscape(key)}, "/")
+	if debug {
+		log.Println("requestUrl:", requestURL)
+	}
+
+	request, err := http.NewRequest("DELETE", requestURL, nil)
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if debug {
+		body, _ := ioutil.ReadAll(response.Body)
+		log.Println("response Body:", string(body))
+	}
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return errors.New(response.Status)
+	}
+
+	return nil
 }
 
 // LoadKeyValuesFromConsul queries Consul and loads the results into a kv.List
