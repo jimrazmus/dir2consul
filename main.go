@@ -94,11 +94,7 @@ func main() {
 }
 
 func consulPut(key string, value []byte) error {
-	requestURL := ConsulServerURL
-	if len(ConsulKeyPrefix) > 0 {
-		requestURL = strings.Join([]string{requestURL, url.PathEscape(ConsulKeyPrefix)}, "/")
-	}
-	requestURL = strings.Join([]string{requestURL, url.PathEscape(key)}, "/")
+	requestURL := strings.Join([]string{ConsulServerURL, url.PathEscape(key)}, "/")
 	if debug {
 		log.Println("requestUrl:", requestURL)
 	}
@@ -196,6 +192,10 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 		}
 
 		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
+		if ConsulKeyPrefix != "" {
+			elemKey = strings.Join([]string{ConsulKeyPrefix, elemKey}, "/")
+		}
+
 		elemVal, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
