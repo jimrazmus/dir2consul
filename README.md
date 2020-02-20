@@ -30,3 +30,15 @@ TBD
 dir2consul needs a Vault policy that allows the service to modify Consul KV data.
 
 *example policy TBD*
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Author
+
+Jim Razmus II
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
