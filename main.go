@@ -200,6 +200,10 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 		if err != nil {
 			return err
 		}
+		if len(elemVal) > 512000 {
+			log.Printf("Skipping %s: value length exceeds Consul's 512KB limit", elemKey)
+			return nil
+		}
 
 		switch strings.ToLower(filepath.Ext(path)) {
 		// case ".hcl":
