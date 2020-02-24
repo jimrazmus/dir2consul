@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
@@ -21,18 +22,32 @@ var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
 
-// IgnoreDirs is a comma delimited list of directory patterns to ignore when walking the file system
-var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
+// IgnoreDirRegex is a PCRE regular expression that matches directories we ignore when walking the file system
+var IgnoreDirRegex = getenv("D2C_IGNORE_DIR_REGEX", `^\.git|^\.github`)
 
-// IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the file system
-var IgnoreTypes = strings.Split(getenv("D2C_IGNORE_TYPES", ""), ",")
+// IgnoreFileRegex is a PCRE regular expression that matches files we ignore when walking the file system
+var IgnoreFileRegex = getenv("D2C_IGNORE_FILE_REGEX", `README\.md`)
+
+var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 
 func main() {
 	log.Println("dir2consul starting with configuration:")
 	log.Println("D2C_CONSUL_KEY_PREFIX:", ConsulKeyPrefix)
 	log.Println("D2C_DIRECTORY:", Directory)
-	log.Println("D2C_IGNORE_DIRS:", IgnoreDirs)
-	log.Println("D2C_IGNORE_TYPES:", IgnoreTypes)
+	log.Println("D2C_IGNORE_DIR_REGEX:", IgnoreDirRegex)
+	log.Println("D2C_IGNORE_FILE_REGEX:", IgnoreFileRegex)
+
+	var err error
+
+	// Compile regular expressions
+	dirIgnoreRe, err = regexp.Compile(IgnoreDirRegex)
+	if err != nil {
+		log.Fatal("Ignore Dir Regex failed to compile:", err)
+	}
+	fileIgnoreRe = regexp.MustCompile(IgnoreFileRegex)
+	if err != nil {
+		log.Fatal("Ignore File Regex failed to compile:", err)
+	}
 
 	os.Chdir(Directory)
 
@@ -102,11 +117,13 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 			return err
 		}
 
-		if info.Mode().IsDir() && ignoreDir(path, IgnoreDirs) {
+		// Skip directories we want to ignore
+		if info.Mode().IsDir() && dirIgnoreRe.MatchString(path) {
 			return filepath.SkipDir
 		}
 
-		if info.Mode().IsDir() || !info.Mode().IsRegular() || ignoreFile(path, IgnoreTypes) {
+		// Skip directories, non-regular files, and files we want to ignore
+		if info.Mode().IsDir() || !info.Mode().IsRegular() || fileIgnoreRe.MatchString(path) {
 			return nil
 		}
 
@@ -147,34 +164,6 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 
 		return nil
 	})
-}
-
-// ignoreDir returns true if the directory should be ignored. Reference filepath.Match for pattern syntax
-func ignoreDir(path string, ignoreDirs []string) bool {
-	for _, dir := range ignoreDirs {
-		match, err := filepath.Match(dir, path)
-		if err != nil {
-			log.Fatal(err) // xxx: better error message
-		}
-		if match {
-			return true
-		}
-	}
-	return false
-}
-
-// ignoreFile returns true if the file should be ignored based on file extension matching
-func ignoreFile(path string, ignoreExtensions []string) bool {
-	pathExtension := filepath.Ext(path)
-	if pathExtension == "" {
-		return false
-	}
-	for _, ignoreExtension := range ignoreExtensions {
-		if pathExtension == ignoreExtension {
-			return true
-		}
-	}
-	return false
 }
 
 // func loadHclFile() error {
