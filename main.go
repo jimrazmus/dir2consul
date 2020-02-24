@@ -2,11 +2,8 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,9 +18,6 @@ const debug = true
 // ConsulKeyPrefix is the path prefix to prepend to all consul keys
 var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 
-// ConsulServerURL is the URL of the Consul server kv store
-var ConsulServerURL = getenv("D2C_CONSUL_SERVER", "http://localhost:8500/v1/kv")
-
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
 
@@ -33,22 +27,26 @@ var IgnoreDirs = strings.Split(getenv("D2C_IGNORE_DIRS", ".git"), ",")
 // IgnoreTypes is a comma delimited list of file suffixes to ignore when walking the file system
 var IgnoreTypes = strings.Split(getenv("D2C_IGNORE_TYPES", ""), ",")
 
-// VaultToken is the token value used to access the Consul server
-var VaultToken = getenv("VAULT_TOKEN", "")
-
 func main() {
 	log.Println("dir2consul starting with configuration:")
 	log.Println("D2C_CONSUL_KEY_PREFIX:", ConsulKeyPrefix)
-	log.Println("D2C_CONSUL_SERVER:", ConsulServerURL)
 	log.Println("D2C_DIRECTORY:", Directory)
 	log.Println("D2C_IGNORE_DIRS:", IgnoreDirs)
 	log.Println("D2C_IGNORE_TYPES:", IgnoreTypes)
 
 	os.Chdir(Directory)
 
-	// GO Get KVs from Files
+	// Establish a Consul client
+	// Lots of configuration is encapsulated here.
+	// Reference https://github.com/hashicorp/consul/tree/master/api
+	consulClient, err := api.NewClient(api.DefaultConfig())
+	if err != nil {
+		log.Fatal("Error establishing Consul client:", err)
+	}
+
+	// Get KVs from Files
 	fileKeyValues := kv.NewList()
-	err := LoadKeyValuesFromDisk(fileKeyValues)
+	err = LoadKeyValuesFromDisk(fileKeyValues)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,119 +55,44 @@ func main() {
 		log.Println("fileKeys:", fileKeys)
 	}
 
-	// GO Get KVs from Consul
+	// Get KVs from Consul
 	consulKeyValues := kv.NewList()
-	err = LoadKeyValuesFromConsul(consulKeyValues)
+	consulKVPairs, _, err := consulClient.KV().List(ConsulKeyPrefix, nil)
 	if err != nil {
 		log.Fatal(err)
+	}
+	for _, consulKVPair := range consulKVPairs {
+		consulKeyValues.Set(consulKVPair.Key, consulKVPair.Value)
 	}
 	if debug {
 		consulKeys := consulKeyValues.Keys()
 		log.Println("consulKeys:", consulKeys)
 	}
 
-	// Add or update data in Consul
+	// Add or update data in Consul when it doesn't match the file data
 	for _, key := range fileKeyValues.Keys() {
 		_, fb, _ := fileKeyValues.Get(key, nil)
 		_, cb, _ := consulKeyValues.Get(key, nil)
 		if bytes.Compare(fb, cb) != 0 {
-			err = consulPut(key, fb)
+			p := &api.KVPair{Key: key, Value: fb}
+			_, err = consulClient.KV().Put(p, nil)
 			if err != nil {
-				log.Println("Failed consulPut:", err)
+				log.Println("Failed Consul KV Put:", err)
 			}
 		}
 	}
 
-	// Delete extra data from Consul
+	// Delete data from Consul that doesn't exist in the file data
 	for _, key := range consulKeyValues.Keys() {
 		_, _, err := fileKeyValues.Get(key, nil)
-		if err != nil {
-			err = consulDelete(key)
+		if err != nil { // xxx: check for the not exist err
+			_, err := consulClient.KV().Delete(key, nil)
 			if err != nil {
-				log.Println("Failed consulDelete:", err)
+				log.Println("Failed Consul KV Delete:", err)
 			}
 		}
 	}
 
-}
-
-func consulPut(key string, value []byte) error {
-	requestURL := strings.Join([]string{ConsulServerURL, url.PathEscape(key)}, "/")
-	if debug {
-		log.Println("requestUrl:", requestURL)
-	}
-
-	request, err := http.NewRequest("PUT", requestURL, bytes.NewBuffer(value))
-	if err != nil {
-		return err
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if debug {
-		body, _ := ioutil.ReadAll(response.Body)
-		log.Println("response Body:", string(body))
-	}
-
-	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return errors.New(response.Status)
-	}
-
-	return nil
-}
-
-func consulDelete(key string) error {
-	requestURL := strings.Join([]string{ConsulServerURL, url.PathEscape(key)}, "/")
-	if debug {
-		log.Println("requestUrl:", requestURL)
-	}
-
-	request, err := http.NewRequest("DELETE", requestURL, nil)
-	if err != nil {
-		return err
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if debug {
-		body, _ := ioutil.ReadAll(response.Body)
-		log.Println("response Body:", string(body))
-	}
-
-	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return errors.New(response.Status)
-	}
-
-	return nil
-}
-
-// LoadKeyValuesFromConsul queries Consul and loads the results into a kv.List
-func LoadKeyValuesFromConsul(kv *kv.List) error {
-	client, err := api.NewClient(api.DefaultConfig())
-	if err != nil {
-		return err
-	}
-	consulKv := client.KV()
-	kvPairs, _, err := consulKv.List(ConsulKeyPrefix, nil)
-	if err != nil {
-		return err
-	}
-	for _, kvPair := range kvPairs {
-		kv.Set(kvPair.Key, kvPair.Value)
-	}
-	return nil
 }
 
 // LoadKeyValuesFromDisk walks the file system and loads file contents into a kv.List

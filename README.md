@@ -15,11 +15,11 @@ A files path and name, with the file extension removed, becomes the Consul Key w
 dir2consul uses environment variables to override default configuration values. The variables are:
 
 * D2C_CONSUL_KEY_PREFIX is the path prefix to prepend to all consul keys. Default: ""
-* D2C_CONSUL_SERVER is the URL of the Consul server. Default: http://localhost:8500
 * D2C_DIRECTORY is the directory we should walk. Default: local
 * D2C_IGNORE_DIRS is a comma delimited list of directory patterns to ignore when walking the file system. Reference filepath.Match for pattern syntax. Default: .git
 * D2C_IGNORE_TYPES is a comma delimited list of file suffixes to ignore when walking the file system. Default: ""
-* VAULT_TOKEN is the token value used to access the Consul server. Default: ""
+
+Additionally, Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables).
 
 ## Running with Docker
 
