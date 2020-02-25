@@ -17,10 +17,19 @@ dir2consul uses environment variables to override default configuration values. 
 
 * D2C_CONSUL_KEY_PREFIX is the path prefix to prepend to all consul keys. Default: ""
 * D2C_DIRECTORY is the directory we should walk. Default: local
-* D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. Default: "^\.git|^\.github"
-* D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default: "README\.md"
+* D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. Default:
 
-Additionally, Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables).
+```
+"^\\.git|^\\.github"
+```
+
+* D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default:
+
+```
+"README\.md"
+```
+
+Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables).
 
 ## Running with Docker
 
