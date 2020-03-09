@@ -1,1 +1,9 @@
-dir2consul/repo/.githubx/githubdir2consul/repo/.githubx/githubdir2consul/repo/a/adir2consul/repo/a/adir2consul/repo/a/test-textdir2consul/repo/a/test-textdir2consul/repo/b/bdir2consul/repo/b/bdir2consul/repo/b/test-textdir2consul/repo/b/test-textdir2consul/repo/test-jsondir2consul/repo/test-jsondir2consul/repo/test-textdir2consul/repo/test-text
+repo/.githubx/github : This file should be skipped.
+repo/a/a : a
+repo/a/test-text : a
+repo/b/b : b
+repo/b/test-text : b
+repo/test-json : {
+    "a": 1
+}
+repo/test-text : some text
