@@ -90,9 +90,10 @@ func (k *List) Serialize() []byte {
 	sort.Strings(keys)
 	var buf bytes.Buffer
 	for i := range keys {
-		val, _, _ := k.Get(keys[i], nil)
-		_, _ = buf.Write([]byte(keys[i]))
+		_, val, _ := k.Get(keys[i], nil)
+		_, _ = buf.Write([]byte(keys[i] + " : "))
 		_, _ = buf.Write([]byte(val))
+		_, _ = buf.Write([]byte("\n"))
 	}
 	return buf.Bytes()
 }
