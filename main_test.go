@@ -40,6 +40,12 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			`.gitx|skipme`,
 			`README.md`,
 		},
+		{
+			"skip_bigfile",
+			"project-b",
+			`a^`,
+			`a^`,
+		},
 	}
 
 	for i, tc := range cases {
