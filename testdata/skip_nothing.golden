@@ -1,0 +1,12 @@
+repo/.githubx/github : This file should be skipped.
+repo/.gitx/testfile : testing
+repo/README : readme file
+repo/a/a : a
+repo/a/test-text : a
+repo/b/b : b
+repo/b/test-text : b
+repo/skipme/skipped : This file should be skipped.
+repo/test-json : {
+    "a": 1
+}
+repo/test-text : some text
