@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/consul/sdk/testutil"
 	"github.com/jimrazmus/dir2consul/kv"
 )
 
