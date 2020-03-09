@@ -2,7 +2,9 @@
 package kv
 
 import (
+	"bytes"
 	"errors"
+	"sort"
 	"sync"
 )
 
@@ -74,4 +76,23 @@ func (k *List) Values() [][]byte {
 		i++
 	}
 	return values
+}
+
+// Serialize flattens the key-values into a byte slice
+func (k *List) Serialize() []byte {
+	k.RLock()
+	defer k.RUnlock()
+	// var err error
+	keys := k.Keys()
+	if len(keys) == 0 {
+		return []byte("empty")
+	}
+	sort.Strings(keys)
+	var buf bytes.Buffer
+	for i := range keys {
+		val, _, _ := k.Get(keys[i], nil)
+		_, _ = buf.Write([]byte(keys[i]))
+		_, _ = buf.Write([]byte(val))
+	}
+	return buf.Bytes()
 }
