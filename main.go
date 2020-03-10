@@ -14,7 +14,7 @@ import (
 )
 
 // conditionally compile in or out the debug prints
-const debug = true
+const debug = false
 
 // ConsulKeyPrefix is the path prefix to prepend to all consul keys
 var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
@@ -23,10 +23,10 @@ var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 var Directory = getenv("D2C_DIRECTORY", "local")
 
 // IgnoreDirRegex is a PCRE regular expression that matches directories we ignore when walking the file system
-var IgnoreDirRegex = getenv("D2C_IGNORE_DIR_REGEX", `^\.git|^\.github`)
+var IgnoreDirRegex = getenv("D2C_IGNORE_DIR_REGEX", `a^`)
 
 // IgnoreFileRegex is a PCRE regular expression that matches files we ignore when walking the file system
-var IgnoreFileRegex = getenv("D2C_IGNORE_FILE_REGEX", `README\.md`)
+var IgnoreFileRegex = getenv("D2C_IGNORE_FILE_REGEX", `README.md`)
 
 var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 
@@ -117,13 +117,28 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 			return err
 		}
 
-		// Skip directories we want to ignore
+		// Skip dot directory
+		if info.Mode().IsDir() && info.Name() == "." {
+			return nil
+		}
+
+		// Skip over hidden directories
+		if info.Mode().IsDir() && strings.HasPrefix(info.Name(), ".") {
+			return filepath.SkipDir
+		}
+
+		// Skip over directories we want to ignore
 		if info.Mode().IsDir() && dirIgnoreRe.MatchString(path) {
 			return filepath.SkipDir
 		}
 
-		// Skip directories, non-regular files, and files we want to ignore
-		if info.Mode().IsDir() || !info.Mode().IsRegular() || fileIgnoreRe.MatchString(path) {
+		// Skip directories, non-regular files, and dot files
+		if info.Mode().IsDir() || !info.Mode().IsRegular() || strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+
+		// Skip files we want to ignore
+		if info.Mode().IsRegular() && fileIgnoreRe.MatchString(info.Name()) {
 			return nil
 		}
 
