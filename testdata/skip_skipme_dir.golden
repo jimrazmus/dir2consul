@@ -4,8 +4,6 @@ repo/a/test-text : a
 repo/b/b : b
 repo/b/test-text : b
 repo/skipme : May be skipped.
-repo/skipme/another : another
-repo/skipme/skipme : May be skipped.
 repo/test-json : {
     "a": 1
 }
