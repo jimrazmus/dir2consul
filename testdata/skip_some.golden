@@ -1,8 +1,8 @@
-repo/.githubx/github : This file should be skipped.
 repo/a/a : a
 repo/a/test-text : a
 repo/b/b : b
 repo/b/test-text : b
+repo/skipme : May be skipped.
 repo/test-json : {
     "a": 1
 }

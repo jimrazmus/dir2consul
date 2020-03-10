@@ -35,9 +35,21 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			`a^`,
 		},
 		{
-			"skip_some",
+			"skip_skipme_dir",
 			"project-a",
-			`.gitx|skipme`,
+			`skipme`,
+			`a^`,
+		},
+		{
+			"skip_skipme_file",
+			"project-a",
+			`a^`,
+			`skipme`,
+		},
+		{
+			"skip_readme_file",
+			"project-a",
+			`a^`,
 			`README.md`,
 		},
 		{
