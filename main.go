@@ -22,6 +22,9 @@ var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 // Directory is the directory we should walk
 var Directory = getenv("D2C_DIRECTORY", "local")
 
+// DryRun is a flag to prevent Consul data modifications
+var DryRun = getenv("D2C_DRYRUN", "")
+
 // IgnoreDirRegex is a PCRE regular expression that matches directories we ignore when walking the file system
 var IgnoreDirRegex = getenv("D2C_IGNORE_DIR_REGEX", `a^`)
 
@@ -34,6 +37,7 @@ func main() {
 	log.Println("dir2consul starting with configuration:")
 	log.Println("D2C_CONSUL_KEY_PREFIX:", ConsulKeyPrefix)
 	log.Println("D2C_DIRECTORY:", Directory)
+	log.Println("D2C_DRYRUN:", DryRun)
 	log.Println("D2C_IGNORE_DIR_REGEX:", IgnoreDirRegex)
 	log.Println("D2C_IGNORE_FILE_REGEX:", IgnoreFileRegex)
 
@@ -89,6 +93,10 @@ func main() {
 		_, fb, _ := fileKeyValues.Get(key, nil)
 		_, cb, _ := consulKeyValues.Get(key, nil)
 		if bytes.Compare(fb, cb) != 0 {
+			if DryRun != "" {
+				log.Printf("SET key: %s value: %s\n", key, string(fb))
+				continue
+			}
 			p := &api.KVPair{Key: key, Value: fb}
 			_, err = consulClient.KV().Put(p, nil)
 			if err != nil {
@@ -101,6 +109,10 @@ func main() {
 	for _, key := range consulKeyValues.Keys() {
 		_, _, err := fileKeyValues.Get(key, nil)
 		if err != nil { // xxx: check for the not exist err
+			if DryRun != "" {
+				log.Printf("DELETE key: %s\n", key)
+				continue
+			}
 			_, err := consulClient.KV().Delete(key, nil)
 			if err != nil {
 				log.Println("Failed Consul KV Delete:", err)

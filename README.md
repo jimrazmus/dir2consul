@@ -17,6 +17,7 @@ dir2consul uses environment variables to override default configuration values. 
 
 * D2C_CONSUL_KEY_PREFIX is the path to prepend to all Consul keys. Default: ""
 * D2C_DIRECTORY is the directory dir2consul will walk. Default: local
+* D2C_DRYRUN is a flag that prevents all Consul data modification. Set it to any value to enable. Default: ""
 * D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. The default value is impossible to match. Default: "a^"
 * D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default: "README.md"
 
@@ -24,12 +25,13 @@ Consul specific configuration variables are documented [here](https://www.consul
 
 ## Running with Docker
 
-The following command mirrors the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
+The following command does a dry run of mirroring the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
 
 ```
 docker run -v $(PWD):/local \
   --env CONSUL_HTTP_ADDR=consul.example.com:8500 \
   --env D2C_CONSUL_KEY_PREFIX=some/specific/kv/path \
+  --env D2C_DRYRUN=true \
   jimrazmus/dir2consul:v1.2.0
 ```
 
