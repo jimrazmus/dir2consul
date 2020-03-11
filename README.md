@@ -7,32 +7,31 @@
 
 ## Summary
 
-dir2consul mirrors a file directory to a Consul Key-Value (KV) Store
+dir2consul mirrors a filesystem directory to a Consul Key-Value (KV) Store
 
-A files path and name, with the file extension removed, becomes the Consul Key while the contents of the file are the Value. Note that mirroring is exact which includes removing any Consul Keys that are not present in the source files. Hidden files and directories, those beginning with ".", are always skipped.
+A files path and name, with the file extension removed, becomes the Consul Key while the contents of the file are the Value. Note that mirroring is exact which includes *deleting* any Consul Keys that are not present in the source files. Hidden files and directories, those beginning with ".", are always skipped.
 
 ## Configuration
 
 dir2consul uses environment variables to override default configuration values. The variables are:
 
-* D2C_CONSUL_KEY_PREFIX is the path prefix to prepend to all consul keys. Default: ""
-* D2C_DIRECTORY is the directory we should walk. Default: local
-* D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. Default: "a^"
+* D2C_CONSUL_KEY_PREFIX is the path to prepend to all Consul keys. Default: ""
+* D2C_DIRECTORY is the directory dir2consul will walk. Default: local
+* D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. The default value is impossible to match. Default: "a^"
 * D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default: "README.md"
 
-Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables).
+Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables) and may be used to customize dir2consul connectivity to a Consul server.
 
 ## Running with Docker
 
+The following command mirrors the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
+
 ```
-docker run --env-file=.env jimrazmus/dir2consul:v1.2.0
+docker run -v $(PWD):/local \
+  --env CONSUL_HTTP_ADDR=consul.example.com:8500 \
+  --env D2C_CONSUL_KEY_PREFIX=some/specific/kv/path \
+  jimrazmus/dir2consul:v1.2.0
 ```
-
-## Vault Policy
-
-dir2consul needs a Vault policy that allows the service to modify Consul KV data.
-
-*example policy TBD*
 
 ## Contributing
 
