@@ -2,6 +2,21 @@
 ## [Unreleased]
 
 
+<a name="v1.3.0"></a>
+## [v1.3.0] - 2020-03-11
+### Chore
+- delete unused makefile
+
+### Docs
+- Make README more usable.
+
+### Feat
+- Add dry run capability. Closes [#15](https://github.com/jimrazmus/dir2consul/issues/15)
+
+### Pull Requests
+- Merge pull request [#16](https://github.com/jimrazmus/dir2consul/issues/16) from jimrazmus/dry-run
+
+
 <a name="v1.2.0"></a>
 ## [v1.2.0] - 2020-03-10
 ### Build
@@ -9,6 +24,7 @@
 - update ci to use golang 1.14
 
 ### Chore
+- add changelog
 - go get -u && go mod tidy
 
 ### Docs
@@ -74,7 +90,8 @@
 - Merge pull request [#1](https://github.com/jimrazmus/dir2consul/issues/1) from jimrazmus/simple
 
 
-[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.3.0...HEAD
+[v1.3.0]: https://github.com/jimrazmus/dir2consul/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/jimrazmus/dir2consul/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/jimrazmus/dir2consul/compare/v1.0.1...v1.1.0
 [v1.0.1]: https://github.com/jimrazmus/dir2consul/compare/v1.0.0...v1.0.1
