@@ -13,9 +13,6 @@ import (
 	"github.com/jimrazmus/dir2consul/kv"
 )
 
-// conditionally compile in or out the debug prints
-const debug = false
-
 // ConsulKeyPrefix is the path prefix to prepend to all consul keys
 var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
 
@@ -69,10 +66,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if debug {
-		fileKeys := fileKeyValues.Keys()
-		log.Println("fileKeys:", fileKeys)
-	}
 
 	// Get KVs from Consul
 	consulKeyValues := kv.NewList()
@@ -82,10 +75,6 @@ func main() {
 	}
 	for _, consulKVPair := range consulKVPairs {
 		consulKeyValues.Set(consulKVPair.Key, consulKVPair.Value)
-	}
-	if debug {
-		consulKeys := consulKeyValues.Keys()
-		log.Println("consulKeys:", consulKeys)
 	}
 
 	// Add or update data in Consul when it doesn't match the file data
@@ -152,10 +141,6 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 		// Skip files we want to ignore
 		if info.Mode().IsRegular() && fileIgnoreRe.MatchString(info.Name()) {
 			return nil
-		}
-
-		if debug {
-			log.Println("path:", path)
 		}
 
 		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
