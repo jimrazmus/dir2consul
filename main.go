@@ -2,55 +2,26 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/jimrazmus/dir2consul/kv"
+	"github.com/spf13/viper"
 )
-
-// ConsulKeyPrefix is the path prefix to prepend to all consul keys
-var ConsulKeyPrefix = getenv("D2C_CONSUL_KEY_PREFIX", "")
-
-// Directory is the directory we should walk
-var Directory = getenv("D2C_DIRECTORY", "local")
-
-// DryRun is a flag to prevent Consul data modifications
-var DryRun = getenv("D2C_DRYRUN", "")
-
-// IgnoreDirRegex is a PCRE regular expression that matches directories we ignore when walking the file system
-var IgnoreDirRegex = getenv("D2C_IGNORE_DIR_REGEX", `a^`)
-
-// IgnoreFileRegex is a PCRE regular expression that matches files we ignore when walking the file system
-var IgnoreFileRegex = getenv("D2C_IGNORE_FILE_REGEX", `README.md`)
 
 var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 
 func main() {
-	log.Println("dir2consul starting with configuration:")
-	log.Println("D2C_CONSUL_KEY_PREFIX:", ConsulKeyPrefix)
-	log.Println("D2C_DIRECTORY:", Directory)
-	log.Println("D2C_DRYRUN:", DryRun)
-	log.Println("D2C_IGNORE_DIR_REGEX:", IgnoreDirRegex)
-	log.Println("D2C_IGNORE_FILE_REGEX:", IgnoreFileRegex)
 
-	var err error
-
-	// Compile regular expressions
-	dirIgnoreRe, err = regexp.Compile(IgnoreDirRegex)
-	if err != nil {
-		log.Fatal("Ignore Dir Regex failed to compile:", err)
-	}
-	fileIgnoreRe = regexp.MustCompile(IgnoreFileRegex)
-	if err != nil {
-		log.Fatal("Ignore File Regex failed to compile:", err)
-	}
-
-	os.Chdir(Directory)
+	setupEnvironment()
+	fmt.Println(startupMessage())
 
 	// Establish a Consul client
 	// Lots of configuration is encapsulated here.
@@ -69,7 +40,7 @@ func main() {
 
 	// Get KVs from Consul
 	consulKeyValues := kv.NewList()
-	consulKVPairs, _, err := consulClient.KV().List(ConsulKeyPrefix, nil)
+	consulKVPairs, _, err := consulClient.KV().List(viper.GetString("D2C_CONSUL_KEY_PREFIX"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,9 +53,11 @@ func main() {
 		_, fb, _ := fileKeyValues.Get(key, nil)
 		_, cb, _ := consulKeyValues.Get(key, nil)
 		if bytes.Compare(fb, cb) != 0 {
-			if DryRun != "" {
-				log.Printf("SET key: %s value: %s\n", key, string(fb))
+			if viper.GetBool("D2C_DRYRUN") {
 				continue
+			}
+			if viper.GetBool("D2C_VERBOSE") {
+				log.Printf("SET key: %s value: %s\n", key, string(fb))
 			}
 			p := &api.KVPair{Key: key, Value: fb}
 			_, err = consulClient.KV().Put(p, nil)
@@ -98,9 +71,11 @@ func main() {
 	for _, key := range consulKeyValues.Keys() {
 		_, _, err := fileKeyValues.Get(key, nil)
 		if err != nil { // xxx: check for the not exist err
-			if DryRun != "" {
-				log.Printf("DELETE key: %s\n", key)
+			if viper.GetBool("D2C_DRYRUN") {
 				continue
+			}
+			if viper.GetBool("D2C_VERBOSE") {
+				log.Printf("DELETE key: %s\n", key)
 			}
 			_, err := consulClient.KV().Delete(key, nil)
 			if err != nil {
@@ -109,6 +84,35 @@ func main() {
 		}
 	}
 
+}
+
+func setupEnvironment() {
+	viper.SetEnvPrefix("D2C")
+	viper.SetDefault("CONSUL_KEY_PREFIX", "dir2consul")
+	viper.SetDefault("DIRECTORY", "local/repo")
+	viper.SetDefault("DRYRUN", "false")
+	viper.SetDefault("IGNORE_DIR_REGEX", `a^`)
+	viper.SetDefault("IGNORE_FILE_REGEX", `README.md`)
+	viper.SetDefault("VERBOSE", "false")
+	viper.AutomaticEnv()
+	viper.BindEnv("CONSUL_KEY_PREFIX")
+	viper.BindEnv("DIRECTORY")
+	viper.BindEnv("DRYRUN")
+	viper.BindEnv("IGNORE_DIR_REGEX")
+	viper.BindEnv("IGNORE_FILE_REGEX")
+	viper.BindEnv("VERBOSE")
+}
+
+func startupMessage() string {
+	banner := "\n------------\n dir2consul \n------------\n"
+
+	config := "Configuration" + "\n\tD2C_CONSUL_KEY_PREFIX: " + viper.GetString("CONSUL_KEY_PREFIX") + "\n\tD2C_DIRECTORY: " + viper.GetString("DIRECTORY") + "\n\tD2C_DRYRUN: " + viper.GetString("DRYRUN") + "\n\tD2C_IGNORE_DIR_REGEX: " + viper.GetString("IGNORE_DIR_REGEX") + "\n\tD2C_IGNORE_FILE_REGEX: " + viper.GetString("IGNORE_FILE_REGEX") + "\n\tD2C_VERBOSE: " + viper.GetString("VERBOSE")
+
+	env := os.Environ()
+	sort.Strings(env)
+	environment := fmt.Sprintf("\nEnvironment\n\t%s", strings.Join(env, "\n\t"))
+
+	return banner + config + environment
 }
 
 // LoadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
@@ -144,8 +148,8 @@ func LoadKeyValuesFromDisk(kv *kv.List) error {
 		}
 
 		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
-		if ConsulKeyPrefix != "" {
-			elemKey = strings.Join([]string{ConsulKeyPrefix, elemKey}, "/")
+		if viper.IsSet("D2C_CONSUL_KEY_PREFIX") {
+			elemKey = strings.Join([]string{viper.GetString("D2C_CONSUL_KEY_PREFIX"), elemKey}, "/")
 		}
 
 		elemVal, err := ioutil.ReadFile(path)

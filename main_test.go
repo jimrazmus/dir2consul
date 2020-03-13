@@ -10,10 +10,53 @@ import (
 	"testing"
 
 	"github.com/jimrazmus/dir2consul/kv"
+	"github.com/spf13/viper"
 )
 
 // go test -update
 var update = flag.Bool("update", false, "update .golden files")
+
+func TestSetupEnvironment(t *testing.T) {
+	os.Clearenv()
+	setupEnvironment()
+	if viper.GetString("CONSUL_KEY_PREFIX") != "dir2consul" {
+		t.Error("D2C_CONSUL_KEY_PREFIX != dir2consul")
+	}
+	if viper.GetString("DIRECTORY") != "local/repo" {
+		t.Error("D2C_DIRECTORY != local/repo")
+	}
+	if viper.GetString("DRYRUN") != "false" && !viper.GetBool("DRYRUN") {
+		t.Error("D2C_DRYRUN != false")
+	}
+	if viper.GetString("IGNORE_DIR_REGEX") != "a^" {
+		t.Error("D2C_IGNORE_DIR_REGEX != a^")
+	}
+	if viper.GetString("IGNORE_FILE_REGEX") != "README.md" {
+		t.Error("D2C_IGNORE_FILE_REGEX != README.md")
+	}
+	if viper.GetString("VERBOSE") != "false" && !viper.GetBool("VERBOSE") {
+		t.Error("D2C_VERBOSE != false")
+	}
+}
+
+func TestStartupMessage(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("TEST", "TestStartupMessage")
+	setupEnvironment()
+	actual := []byte(startupMessage())
+	auFile := "testdata/TestStartupMessage.golden"
+	if *update {
+		ioutil.WriteFile(auFile, actual, 0644)
+	}
+	golden, err := ioutil.ReadFile(auFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(golden, actual) {
+		t.Errorf("failed\nexpected:\n%s\ngot:\n%s", string(golden[:]), string(actual[:]))
+	}
+
+}
 
 func TestLoadKeyValuesFromDisk(t *testing.T) {
 	cases := []struct {
