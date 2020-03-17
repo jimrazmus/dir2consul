@@ -21,7 +21,7 @@ func main() {
 	setupEnvironment()
 	fmt.Println(startupMessage())
 
-	dirIgnoreRe, fileIgnoreRe, err := compileRegexps(viper.GetString("D2C_IGNORE_DIR_REGEX"), viper.GetString("D2C_IGNORE_FILE_REGEX"))
+	dirIgnoreRe, fileIgnoreRe, err := compileRegexps(viper.GetString("IGNORE_DIR_REGEX"), viper.GetString("IGNORE_FILE_REGEX"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func main() {
 
 	// Get KVs from Consul
 	consulKeyValues := kv.NewList()
-	consulKVPairs, _, err := consulClient.KV().List(viper.GetString("D2C_CONSUL_KEY_PREFIX"), nil)
+	consulKVPairs, _, err := consulClient.KV().List(viper.GetString("CONSUL_KEY_PREFIX"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -145,8 +145,8 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		}
 
 		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
-		if viper.IsSet("D2C_CONSUL_KEY_PREFIX") {
-			elemKey = strings.Join([]string{viper.GetString("D2C_CONSUL_KEY_PREFIX"), elemKey}, "/")
+		if viper.IsSet("CONSUL_KEY_PREFIX") {
+			elemKey = strings.Join([]string{viper.GetString("CONSUL_KEY_PREFIX"), elemKey}, "/")
 		}
 
 		elemVal, err := ioutil.ReadFile(path)
@@ -185,10 +185,10 @@ func addOrUpdateConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, con
 		_, fb, _ := fileKeyValues.Get(key, nil)
 		_, cb, _ := consulKeyValues.Get(key, nil)
 		if bytes.Compare(fb, cb) != 0 {
-			if viper.GetBool("D2C_DRYRUN") {
+			if viper.GetBool("DRYRUN") {
 				continue
 			}
-			if viper.GetBool("D2C_VERBOSE") {
+			if viper.GetBool("VERBOSE") {
 				log.Printf("SET key: %s value: %s\n", key, string(fb))
 			}
 			p := &api.KVPair{Key: key, Value: fb}
@@ -205,10 +205,10 @@ func deleteExtraConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, con
 	for _, key := range consulKeyValues.Keys() {
 		_, _, err := fileKeyValues.Get(key, nil)
 		if err != nil { // xxx: check for the not exist err
-			if viper.GetBool("D2C_DRYRUN") {
+			if viper.GetBool("DRYRUN") {
 				continue
 			}
-			if viper.GetBool("D2C_VERBOSE") {
+			if viper.GetBool("VERBOSE") {
 				log.Printf("DELETE key: %s\n", key)
 			}
 			_, err := consulClient.KV().Delete(key, nil)

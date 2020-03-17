@@ -1,10 +1,10 @@
-repo/README : readme file
-repo/a/a : a
-repo/a/test-text : a
-repo/b/b : b
-repo/b/test-text : b
-repo/skipme : May be skipped.
-repo/test-json : {
+dir2consul/repo/README : readme file
+dir2consul/repo/a/a : a
+dir2consul/repo/a/test-text : a
+dir2consul/repo/b/b : b
+dir2consul/repo/b/test-text : b
+dir2consul/repo/skipme : May be skipped.
+dir2consul/repo/test-json : {
     "a": 1
 }
-repo/test-text : some text
+dir2consul/repo/test-text : some text
