@@ -2,6 +2,36 @@
 ## [Unreleased]
 
 
+<a name="v1.4.0"></a>
+## [v1.4.0] - 2020-03-17
+### Build
+- include modules in coverage check
+- Remove debug logic. Use IDE debugger.
+
+### Chore
+- update and tidy modules
+
+### Docs
+- reference version 1.4.0
+- use quotes consistently
+- add link to regex docs
+- fix link
+- dry run requires v1.3.0
+
+### Feat
+- Switch to Viper and add verbose option.
+
+### Refactor
+- mv consul mutation to functions for future testing
+- make function private
+- relocate chdir for better context
+- Seperate and test regex compilation
+
+### Pull Requests
+- Merge pull request [#18](https://github.com/jimrazmus/dir2consul/issues/18) from jimrazmus/overhaul
+- Merge pull request [#17](https://github.com/jimrazmus/dir2consul/issues/17) from jimrazmus/delete-debug
+
+
 <a name="v1.3.0"></a>
 ## [v1.3.0] - 2020-03-11
 ### Chore
@@ -90,7 +120,8 @@
 - Merge pull request [#1](https://github.com/jimrazmus/dir2consul/issues/1) from jimrazmus/simple
 
 
-[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/jimrazmus/dir2consul/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/jimrazmus/dir2consul/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/jimrazmus/dir2consul/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/jimrazmus/dir2consul/compare/v1.0.1...v1.1.0
