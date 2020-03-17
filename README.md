@@ -24,6 +24,8 @@ dir2consul uses environment variables to override default configuration values. 
 
 Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables) and may be used to customize dir2consul connectivity to a Consul server.
 
+Read more about [regular expression syntax](https://github.com/google/re2/wiki/Syntax) to get the desired behavior with the D2C_IGNORE_DIR_REGEX and D2C_IGNORE_FILE_REGEX configuration options.
+
 ## Running with Docker
 
 The following command does a dry run of mirroring the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
