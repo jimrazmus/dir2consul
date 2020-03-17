@@ -150,7 +150,7 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 				t.Fatal(err)
 			}
 			actual := kv.NewList()
-			err = LoadKeyValuesFromDisk(actual, dirIgnoreRe, fileIgnoreRe)
+			err = loadKeyValuesFromDisk(actual, dirIgnoreRe, fileIgnoreRe)
 			if err != nil {
 				t.Fatal(err)
 			}

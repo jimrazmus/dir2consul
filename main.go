@@ -36,7 +36,7 @@ func main() {
 
 	// Get KVs from Files
 	fileKeyValues := kv.NewList()
-	err = LoadKeyValuesFromDisk(fileKeyValues, dirIgnoreRe, fileIgnoreRe)
+	err = loadKeyValuesFromDisk(fileKeyValues, dirIgnoreRe, fileIgnoreRe)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,8 +135,8 @@ func compileRegexps(dirPcre string, filePcre string) (*regexp.Regexp, *regexp.Re
 	return dirRe, fileRe, nil
 }
 
-// LoadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
-func LoadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe *regexp.Regexp) error {
+// loadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
+func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe *regexp.Regexp) error {
 	// Change directory to where the files are located
 	err := os.Chdir(viper.GetString("DIRECTORY"))
 	if err != nil {
