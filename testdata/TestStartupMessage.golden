@@ -1,0 +1,13 @@
+
+------------
+ dir2consul 
+------------
+Configuration
+	D2C_CONSUL_KEY_PREFIX: dir2consul
+	D2C_DIRECTORY: local/repo
+	D2C_DRYRUN: false
+	D2C_IGNORE_DIR_REGEX: a^
+	D2C_IGNORE_FILE_REGEX: README.md
+	D2C_VERBOSE: false
+Environment
+	TEST=TestStartupMessage
