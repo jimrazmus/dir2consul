@@ -58,6 +58,31 @@ func TestStartupMessage(t *testing.T) {
 
 }
 
+func TestCompileRegexps(t *testing.T) {
+	cases := []struct {
+		name string
+		dre  string
+		fre  string
+		want error
+	}{
+		{
+			`defaults succeed`,
+			`a^`,
+			`README.md`,
+			nil,
+		},
+	}
+
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("%d_%s", i, tc.name), func(t *testing.T) {
+			_, _, err := compileRegexps(tc.dre, tc.fre)
+			if err != tc.want {
+				t.Errorf("%s failed (%s)\n", tc.name, err)
+			}
+		})
+	}
+}
+
 func TestLoadKeyValuesFromDisk(t *testing.T) {
 	cases := []struct {
 		name string

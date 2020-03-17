@@ -16,12 +16,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
-
 func main() {
 
 	setupEnvironment()
 	fmt.Println(startupMessage())
+
+	dirIgnoreRe, fileIgnoreRe, err := compileRegexps(viper.GetString("D2C_IGNORE_DIR_REGEX"), viper.GetString("D2C_IGNORE_FILE_REGEX"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Establish a Consul client
 	// Lots of configuration is encapsulated here.
@@ -33,7 +36,7 @@ func main() {
 
 	// Get KVs from Files
 	fileKeyValues := kv.NewList()
-	err = LoadKeyValuesFromDisk(fileKeyValues)
+	err = LoadKeyValuesFromDisk(fileKeyValues, dirIgnoreRe, fileIgnoreRe)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,6 +116,23 @@ func startupMessage() string {
 	environment := fmt.Sprintf("\nEnvironment\n\t%s", strings.Join(env, "\n\t"))
 
 	return banner + config + environment
+}
+
+func compileRegexps(dirPcre string, filePcre string) (*regexp.Regexp, *regexp.Regexp, error) {
+	var err error
+	var dirRe, fileRe *regexp.Regexp
+
+	dirRe, err = regexp.Compile(dirPcre)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Ignore Dir Regex failed to compile: %v", err)
+	}
+
+	fileRe, err = regexp.Compile(filePcre)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Ignore File Regex failed to compile: %v", err)
+	}
+
+	return dirRe, fileRe, nil
 }
 
 // LoadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
