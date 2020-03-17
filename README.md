@@ -16,7 +16,7 @@ A files path and name, with the file extension removed, becomes the Consul Key w
 dir2consul uses environment variables to override default configuration values. The variables are:
 
 * D2C_CONSUL_KEY_PREFIX is the path to prepend to all Consul keys. Default: "dir2consul"
-* D2C_DIRECTORY is the directory dir2consul will walk. Default: local/repo
+* D2C_DIRECTORY is the directory dir2consul will walk. Default: "local/repo"
 * D2C_DRYRUN is a flag that prevents all Consul data modification. Set it to any truthy value to enable. Default: "false"
 * D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. The default value is impossible to match. Default: "a^"
 * D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default: "README.md"
