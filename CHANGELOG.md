@@ -2,6 +2,18 @@
 ## [Unreleased]
 
 
+<a name="v1.4.1"></a>
+## [v1.4.1] - 2020-03-17
+### Fix
+- Remove the D2C_ prefix from viper calls
+
+### Refactor
+- rm unused files.
+
+### Pull Requests
+- Merge pull request [#19](https://github.com/jimrazmus/dir2consul/issues/19) from jimrazmus/fix-config
+
+
 <a name="v1.4.0"></a>
 ## [v1.4.0] - 2020-03-17
 ### Build
@@ -9,6 +21,7 @@
 - Remove debug logic. Use IDE debugger.
 
 ### Chore
+- update changelog
 - update and tidy modules
 
 ### Docs
@@ -120,7 +133,8 @@
 - Merge pull request [#1](https://github.com/jimrazmus/dir2consul/issues/1) from jimrazmus/simple
 
 
-[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.4.1...HEAD
+[v1.4.1]: https://github.com/jimrazmus/dir2consul/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/jimrazmus/dir2consul/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/jimrazmus/dir2consul/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/jimrazmus/dir2consul/compare/v1.1.0...v1.2.0
