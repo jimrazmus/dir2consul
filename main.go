@@ -52,40 +52,10 @@ func main() {
 	}
 
 	// Add or update data in Consul when it doesn't match the file data
-	for _, key := range fileKeyValues.Keys() {
-		_, fb, _ := fileKeyValues.Get(key, nil)
-		_, cb, _ := consulKeyValues.Get(key, nil)
-		if bytes.Compare(fb, cb) != 0 {
-			if viper.GetBool("D2C_DRYRUN") {
-				continue
-			}
-			if viper.GetBool("D2C_VERBOSE") {
-				log.Printf("SET key: %s value: %s\n", key, string(fb))
-			}
-			p := &api.KVPair{Key: key, Value: fb}
-			_, err = consulClient.KV().Put(p, nil)
-			if err != nil {
-				log.Println("Failed Consul KV Put:", err)
-			}
-		}
-	}
+	addOrUpdateConsulData(fileKeyValues, consulKeyValues, consulClient)
 
 	// Delete data from Consul that doesn't exist in the file data
-	for _, key := range consulKeyValues.Keys() {
-		_, _, err := fileKeyValues.Get(key, nil)
-		if err != nil { // xxx: check for the not exist err
-			if viper.GetBool("D2C_DRYRUN") {
-				continue
-			}
-			if viper.GetBool("D2C_VERBOSE") {
-				log.Printf("DELETE key: %s\n", key)
-			}
-			_, err := consulClient.KV().Delete(key, nil)
-			if err != nil {
-				log.Println("Failed Consul KV Delete:", err)
-			}
-		}
-	}
+	deleteExtraConsulData(fileKeyValues, consulKeyValues, consulClient)
 
 }
 
@@ -207,6 +177,46 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 
 		return nil
 	})
+}
+
+func addOrUpdateConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, consulClient *api.Client) {
+	// Add or update data in Consul when it doesn't match the file data
+	for _, key := range fileKeyValues.Keys() {
+		_, fb, _ := fileKeyValues.Get(key, nil)
+		_, cb, _ := consulKeyValues.Get(key, nil)
+		if bytes.Compare(fb, cb) != 0 {
+			if viper.GetBool("D2C_DRYRUN") {
+				continue
+			}
+			if viper.GetBool("D2C_VERBOSE") {
+				log.Printf("SET key: %s value: %s\n", key, string(fb))
+			}
+			p := &api.KVPair{Key: key, Value: fb}
+			_, err := consulClient.KV().Put(p, nil)
+			if err != nil {
+				log.Println("Failed Consul KV Put:", err)
+			}
+		}
+	}
+}
+
+func deleteExtraConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, consulClient *api.Client) {
+	// Delete data from Consul that doesn't exist in the file data
+	for _, key := range consulKeyValues.Keys() {
+		_, _, err := fileKeyValues.Get(key, nil)
+		if err != nil { // xxx: check for the not exist err
+			if viper.GetBool("D2C_DRYRUN") {
+				continue
+			}
+			if viper.GetBool("D2C_VERBOSE") {
+				log.Printf("DELETE key: %s\n", key)
+			}
+			_, err := consulClient.KV().Delete(key, nil)
+			if err != nil {
+				log.Println("Failed Consul KV Delete:", err)
+			}
+		}
+	}
 }
 
 // func loadHclFile() error {
