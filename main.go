@@ -136,7 +136,14 @@ func compileRegexps(dirPcre string, filePcre string) (*regexp.Regexp, *regexp.Re
 }
 
 // LoadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
-func LoadKeyValuesFromDisk(kv *kv.List) error {
+func LoadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe *regexp.Regexp) error {
+	// Change directory to where the files are located
+	err := os.Chdir(viper.GetString("DIRECTORY"))
+	if err != nil {
+		log.Fatal("Couldn't change directory to:", viper.GetString("DIRECTORY"))
+	}
+
+	// Walk the filesystem
 	return filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

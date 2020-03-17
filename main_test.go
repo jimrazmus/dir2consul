@@ -130,12 +130,18 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 
 	for i, tc := range cases {
 		t.Run(fmt.Sprintf("%d_%s", i, tc.name), func(t *testing.T) {
-			var err error
+			os.Clearenv()
+			setupEnvironment()
+			err := os.Setenv("D2C_DIRECTORY", fmt.Sprintf("testdata/%s", tc.dir))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 			dirIgnoreRe, err = regexp.Compile(tc.dre)
 			if err != nil {
 				t.Fatal(err)
 			}
-			fileIgnoreRe = regexp.MustCompile(tc.fre)
+			fileIgnoreRe, err = regexp.Compile(tc.fre)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -143,12 +149,8 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = os.Chdir(fmt.Sprintf("testdata/%s", tc.dir))
-			if err != nil {
-				t.Fatal(err)
-			}
 			actual := kv.NewList()
-			err = LoadKeyValuesFromDisk(actual)
+			err = LoadKeyValuesFromDisk(actual, dirIgnoreRe, fileIgnoreRe)
 			if err != nil {
 				t.Fatal(err)
 			}
