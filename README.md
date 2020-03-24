@@ -1,8 +1,8 @@
 # dir2consul
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/jimrazmus/dir2consul)](https://goreportcard.com/report/github.com/jimrazmus/dir2consul)
-![Build](https://github.com/jimrazmus/dir2consul/workflows/Go/badge.svg?branch=master)
-[![CodeCov](https://codecov.io/gh/jimrazmus/dir2consul/branch/master/graph/badge.svg)](https://codecov.io/gh/jimrazmus/dir2consul)
+[![Go Report Card](https://goreportcard.com/badge/github.com/code42/dir2consul)](https://goreportcard.com/report/github.com/code42/dir2consul)
+![Build](https://github.com/code42/dir2consul/workflows/Go/badge.svg?branch=master)
+[![CodeCov](https://codecov.io/gh/code42/dir2consul/branch/master/graph/badge.svg)](https://codecov.io/gh/code42/dir2consul)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
 ## Summary
