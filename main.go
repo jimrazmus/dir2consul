@@ -243,3 +243,14 @@ func deleteExtraConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, con
 // func loadYamlFile() error {
 // 	return nil
 // }
+
+
+// Emacs formatting variables
+
+// Local Variables:
+// mode: go
+// tab-width: 8
+// indent-tabs-mode: t
+// standard-indent: 8
+// End:
+ 
