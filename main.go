@@ -145,34 +145,45 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		}
 
 		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
-		if viper.IsSet("CONSUL_KEY_PREFIX") {
-			elemKey = strings.Join([]string{viper.GetString("CONSUL_KEY_PREFIX"), elemKey}, "/")
-		}
 
-		elemVal, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		if len(elemVal) > 512000 {
-			log.Printf("Skipping %s: value length exceeds Consul's 512KB limit", elemKey)
-			return nil
-		}
+		filetype := strings.TrimPrefix((strings.ToLower(filepath.Ext(path))), ".")
 
-		switch strings.ToLower(filepath.Ext(path)) {
-		// case ".hcl":
-		// 	return loadHclFile()
-		// case ".ini":
-		// 	return loadIniFile()
-		// case ".json":
-		// 	return loadJsonFile()
-		// case ".properties":
-		// 	return loadPropertiesFile()
-		// case ".toml":
-		// 	return loadTomlFile()
-		// case ".yaml":
-		// 	return loadYamlFile()
+		// Use the file extension to identify files that should undergo additional parsing
+		// and key-value creation.
+		switch filetype {
+		case "hcl", "ini", "json", "properties", "toml", "yaml", "yml":
+			// use a new Viper to parse the file contents
+			v := viper.NewWithOptions(viper.KeyDelimiter("/"))
+			v.SetConfigType(filetype)
+			f, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			err = v.ReadConfig(f)
+			if err != nil {
+				log.Printf("Error processing %s: %s", elemKey, err)
+				return nil
+			}
+			// iterate over keys within the file
+			for _, key := range v.AllKeys() {
+				if viper.GetBool("VERBOSE") {
+					log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
+				}
+				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+			}
 		default:
-			kv.Set(elemKey, elemVal)
+			if info.Size() > 512000 {
+				log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+				return nil
+			}
+			elemVal, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if viper.GetBool("VERBOSE") {
+				log.Printf("%s=%s", elemKey, []byte(elemVal))
+			}
+			kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
 		}
 
 		return nil
@@ -218,32 +229,6 @@ func deleteExtraConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, con
 		}
 	}
 }
-
-// func loadHclFile() error {
-// 	return nil
-// }
-
-// func loadIniFile() error {
-// 	return nil
-// }
-
-// func loadJsonFile() error {
-// 	// https://github.com/laszlothewiz/golang-snippets-examples/blob/master/walk-JSON-tree.go
-// 	return nil
-// }
-
-// func loadPropertiesFile() error {
-// 	return nil
-// }
-
-// func loadTomlFile() error {
-// 	return nil
-// }
-
-// func loadYamlFile() error {
-// 	return nil
-// }
-
 
 // Emacs formatting variables
 

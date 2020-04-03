@@ -1,0 +1,10 @@
+{
+    "a": 1,
+    "b": {
+        "boolean": true,
+        "number": 101,
+        "string": "something"
+    },
+    "c": "[ 1, 2, 3]",
+    "d": { "silly": "rabbit", "trixs": "are", "for": "kids" }
+}
