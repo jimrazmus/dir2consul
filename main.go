@@ -97,6 +97,12 @@ func startupMessage() string {
 	for _, afile := range files {
 		log.Println(afile.Name())
 	}
+
+	lfiles, _ := ioutil.ReadDir("local/")
+
+	for _, lfile := range lfiles {
+		log.Println(lfile.Name())
+	}
 	
 	// EOFIXME
 	return banner + config + environment
