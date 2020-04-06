@@ -87,7 +87,18 @@ func startupMessage() string {
 	env := os.Environ()
 	sort.Strings(env)
 	environment := fmt.Sprintf("\nEnvironment\n\t%s", strings.Join(env, "\n\t"))
+	// FIXME
 
+	curDir, _ := os.Getwd()
+	log.Println(curDir)
+	
+	files, _ := ioutil.ReadDir(".")
+
+	for _, afile := range files {
+		log.Println(file.Name())
+	}
+	
+	// EOFIXME
 	return banner + config + environment
 }
 
