@@ -95,7 +95,7 @@ func startupMessage() string {
 	files, _ := ioutil.ReadDir(".")
 
 	for _, afile := range files {
-		log.Println(file.Name())
+		log.Println(afile.Name())
 	}
 	
 	// EOFIXME
