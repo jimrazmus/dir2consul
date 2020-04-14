@@ -174,9 +174,9 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		
 		// Skip processing the root default file...
 
-		// Are we looking at the root default file?
+		// Are we looking at a file, or a default file?
                 if filepath.Base(path) == "default" ||
-			filepath.Base(path) == "default." + filepath.Ext(path) {
+			filepath.Base(path) == "default" + filepath.Ext(path) {
 			// Yup ... skipping
 			if viper.GetBool("VERBOSE") {
 				log.Printf("Skipping default file: %s...", path)
@@ -187,7 +187,9 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				log.Printf("Skipping directory -- not a file! %s...", path)
 			}
 		} else {
-		
+			if viper.GetBool("VERBOSE") {
+				log.Printf("Found non-default file: %s\n    of type: %s", filepath.Base(path), filepath.Ext(path))
+			}
 			// Find default files
 			pathPath := filepath.Dir(path)
 			pathRoot := viper.GetString("DIRECTORY")
@@ -359,18 +361,24 @@ func findDefaults(path string, root string) ([]string, error) {
 				return nil, err
 			}
 
+			defaultIndex := 0
 			for _, file := range pathFiles {
 				if file.IsDir() {
 					// skip
 				} else {
 					if file.Name() == "default" ||
-						file.Name() == "default." + filepath.Ext(file.Name()) {
+						file.Name() == "default" + filepath.Ext(file.Name()) {
 						results = append(results, root + "/" + file.Name())
 						if viper.GetBool("VERBOSE") {
 							log.Printf(" --- %s", root + "/" + file.Name())
 						}
+						defaultIndex++
 					}
 				}
+			}
+
+			if defaultIndex > 1 {
+				return nil, fmt.Errorf("Multiple default files found in %s!", fullPath)
 			}
 
 			dirElements := strings.Split(path, "/")
@@ -400,20 +408,26 @@ func findDefaults(path string, root string) ([]string, error) {
 							return nil, err
 						}
 
+						defaultIndex := 0
+						
 						for _, file := range pathFiles {
 							if file.IsDir() {
 								// skip
 							} else {
 								if file.Name() == "default" ||
-									file.Name() == "default." + filepath.Ext(file.Name()) {
+									file.Name() == "default" + filepath.Ext(file.Name()) {
 									results = append(results, aPath + "/" + file.Name())
 									if viper.GetBool("VERBOSE") {
 										log.Printf(" ... %s", aPath + "/" + file.Name())
 									}
+									defaultIndex++
 								}
 							}
 						}
-						
+
+						if defaultIndex > 1 {
+							return nil, fmt.Errorf("Multilple default files found in %s", aPath)
+						}
 					} else {
 						// We found a file, not a directory.  You should never get here
 					}
