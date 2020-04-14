@@ -169,13 +169,14 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		filetype := strings.TrimPrefix((strings.ToLower(filepath.Ext(path))), ".")
 		
 		if viper.GetBool("VERBOSE") {
-			log.Println("\n\n"+path+"\n" + elemKey + "\n")
+			log.Println("\n\n"+path+"\n  - " + elemKey + "\n")
 		}
 		
 		// Skip processing the root default file...
 
 		// Are we looking at the root default file?
-                if strings.HasPrefix(path,"default") {
+                if path == "default" ||
+			path == "default." + filepath.Ext(path) {
 			// Yup ... skipping
 		} else if info.Mode().IsDir() {
 			// Skip this, too -- we care about processing files, and only files
@@ -189,7 +190,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				log.Printf("Error processing path %s: %s", pathRoot + "/" + pathPath, err)
 				return err
 			}
-
+			
 			pathFull := pathRoot + "/" + path
 			
 			// Add our path to the list, making it an ordered list of defaults + our file
@@ -235,11 +236,16 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				if defaultType != "" {
 					if ! strings.HasPrefix(filepath.Base(path), "default") {
 						filesToParse = append(filesToParse, pathFull)
+						if viper.GetBool("VERBOSE") {
+							log.Printf("Adding %s...", pathFull)
+						}
+					} else {
+						if viper.GetBool("VERBOSE") {
+							log.Printf("Skipping %s...", pathFull)
+						}
 					}
 				}
 
-				
-				
 				if  viper.GetBool("VERBOSE") {
 					for idx, p := range filesToParse {
 						log.Printf("+++ %d    %s", idx, p)
@@ -278,112 +284,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 					kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
 				}
 			}
-			// // Use the file extension to identify files that should undergo additional parsing
-			// // and key-value creation.
-			// switch filetype {
-			// case "hcl", "ini", "json", "properties", "toml", "yaml", "yml":
-			// 	// Find default files
-			// 	pathPath := filepath.Dir(path)
-			// 	pathRoot := viper.GetString("DIRECTORY")
-			// 	defaultList, err := findDefaults(pathPath, pathRoot)
-			// 	if err != nil {
-			// 		log.Printf("Error processing path %s: %s", pathRoot + "/" + pathPath, err)
-			// 		return err
-			// 	}
 
-			// 	pathFull := pathRoot + "/" + path
-				
-			// 	// Add our path to the list, making it an ordered list of defaults + our file
-			// 	// of interest
-			// 	var filesToParse []string
-
-			// 	filesToParse = append(filesToParse, defaultList...)
-			// 	filesToParse = append(filesToParse, pathFull)
-
-			// 	if  viper.GetBool("VERBOSE") {
-			// 		for idx, p := range filesToParse {
-			// 			log.Printf("    %d    %s", idx, p)
-			// 		}
-			// 	}
-
-			// 	// Load & merge all the configuration files, in order
-			// 	v, err := mergeConfiguration(filesToParse)
-			// 	if err != nil {
-			// 		log.Printf("Error merging configs! %s", err)
-			// 		return err
-			// 	}
-				
-			// 	// use a new Viper to parse the file contents
-			// 	// v := viper.NewWithOptions(viper.KeyDelimiter("/"))
-			// 	// v.SetConfigType(filetype)
-			// 	// f, err := os.Open(path)
-			// 	// if err != nil {
-			// 	// 	return err
-			// 	// }
-				
-			// 	// err = v.ReadConfig(f)
-			// 	// if err != nil {
-			// 	// 	log.Printf("Error processing %s: %s", elemKey, err)
-			// 	// 	return nil
-			// 	// }
-				
-			// 	// iterate over keys within the file
-			// 	for _, key := range v.AllKeys() {
-			// 		if viper.GetBool("VERBOSE") {
-			// 			log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
-			// 		}
-			// 		kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
-			// 	}
-			// default:
-			// 	if info.Size() > 512000 {
-			// 		log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
-			// 		return nil
-			// 	}
-			// 	// Find default files
-			// 	pathPath := filepath.Dir(path)
-			// 	pathRoot := viper.GetString("DIRECTORY")
-			// 	defaultList, err := findDefaults(pathPath, pathRoot)
-			// 	if err != nil {
-			// 		log.Printf("Error processing path %s: %s", pathRoot + "/" + pathPath, err)
-			// 		return err
-			// 	}
-
-			// 	pathFull := pathRoot + "/" + path
-				
-			// 	// Add our path to the list, making it an ordered list of defaults + our file
-			// 	// of interest
-			// 	var filesToParse []string
-
-			// 	filesToParse = append(filesToParse, defaultList...)
-			// 	filesToParse = append(filesToParse, pathFull)
-
-			// 	if  viper.GetBool("VERBOSE") {
-			// 		for idx, p := range filesToParse {
-			// 			log.Printf("    %d    %s", idx, p)
-			// 		}
-			// 	}
-				
-			// 	// Load & merge all the configuration files, in order
-			// 	v, err := mergeConfiguration(filesToParse)
-			// 	if err != nil {
-			// 		log.Printf("Error merging configs! %s", err)
-			// 		return err
-			// 	}
-			// 	// elemVal, err := ioutil.ReadFile(path)
-			// 	// if err != nil {
-			// 	// 	return err
-			// 	// }
-			// 	// if viper.GetBool("VERBOSE") {
-			// 	// 	log.Printf("%s=%s", elemKey, []byte(elemVal))
-			// 	// }
-			// 	// kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
-			// 	for _, key := range v.AllKeys() {
-			// 		if viper.GetBool("VERBOSE") {
-			// 			log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
-			// 		}
-			// 		kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
-			// 	}
-			// }
 		}
 
 		return nil
@@ -436,6 +337,10 @@ func findDefaults(path string, root string) ([]string, error) {
 	fullPath := root + "/" + path
 	
 	fullPathInfo, err := os.Stat(fullPath)
+
+	if viper.GetBool("VERBOSE") {
+		log.Printf("At findDefaults with:\n  Path: %s\n  Root: %s\n", path, root)
+	}
 	if os.IsNotExist(err) {
 		// Our path doesn't exist
 		return nil, err
@@ -443,7 +348,7 @@ func findDefaults(path string, root string) ([]string, error) {
 		if fullPathInfo.IsDir() {
 
 			// scan each file path entry for files, then scan them for `default` files
-			pathFiles, err := ioutil.ReadDir(fullPath)
+			pathFiles, err := ioutil.ReadDir(root)
 			if err != nil {
 				return nil, err
 			}
@@ -452,26 +357,16 @@ func findDefaults(path string, root string) ([]string, error) {
 				if file.IsDir() {
 					// skip
 				} else {
-					if strings.HasPrefix(file.Name(), "default") {
-						results = append(results, fullPath + "/" + file.Name())
+					if file.Name() == "default" ||
+						file.Name() == "default." + filepath.Ext(file.Name()) {
+						results = append(results, root + "/" + file.Name())
+						if viper.GetBool("VERBOSE") {
+							log.Printf(" --- %s", root + "/" + file.Name())
+						}
 					}
 				}
 			}
-			
-			// rootDefault := root + "/default"
-			
-			// rootPathInfo, err := os.Stat(rootDefault)
-			// if os.IsNotExist(err){
-			// 	// Our root default does not exist, do nothing
-			// } else {
-			// 	// Our root default does exist, add it to the results
-			// 	if ! rootPathInfo.IsDir() {
-			// 		results = append(results, rootDefault)
-			// 	} else {
-			// 		// our root path is a file, somehow
-			// 	}
-			// }
-			
+
 			dirElements := strings.Split(path, "/")
 			
 			var dirConcat string
@@ -503,21 +398,16 @@ func findDefaults(path string, root string) ([]string, error) {
 							if file.IsDir() {
 								// skip
 							} else {
-								if strings.HasPrefix(file.Name(), "default") {
+								if file.Name() == "default" ||
+									file.Name() == "default." + filepath.Ext(file.Name()) {
 									results = append(results, aPath + "/" + file.Name())
+									if viper.GetBool("VERBOSE") {
+										log.Printf(" ... %s", aPath + "/" + file.Name())
+									}
 								}
 							}
 						}
 						
-						// aPathDefault := aPath + "/default"
-						
-						// _, err = os.Stat(aPathDefault)
-						// if os.IsNotExist(err) {
-						// 	// a defualt does not exist, do nothing
-						// } else {
-						// 	// A default *has* been found, add it to the list
-						// 	results = append(results, aPathDefault)
-						// }
 					} else {
 						// We found a file, not a directory.  You should never get here
 					}
