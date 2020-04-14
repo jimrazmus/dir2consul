@@ -175,7 +175,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		// Skip processing the root default file...
 
 		// Are we looking at the root default file?
-                if path == "default" {
+                if strings.HasPrefix(path,"default") {
 			// Yup ... skipping
 		} else if info.Mode().IsDir() {
 			// Skip this, too -- we care about processing files, and only files
@@ -201,7 +201,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 			switch filetype {
 			case "hcl", "ini", "json", "properties", "toml", "yaml", "yml":
 				// If we understand the filetype, let Viper parse it...
-				if filepath.Base(path) != "default" {
+				if ! strings.HasPrefix(filepath.Base(path), "default") {
 					filesToParse = append(filesToParse, pathFull)
 				}
 
@@ -233,7 +233,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				defaultType := viper.GetString("DEFAULT_CONFIG_TYPE")
 
 				if defaultType != "" {
-					if filepath.Base(path) != "default" {
+					if ! strings.HasPrefix(filepath.Base(path), "default") {
 						filesToParse = append(filesToParse, pathFull)
 					}
 				}
@@ -441,20 +441,36 @@ func findDefaults(path string, root string) ([]string, error) {
 		return nil, err
 	} else {
 		if fullPathInfo.IsDir() {
-			
-			rootDefault := root + "/default"
-			
-			rootPathInfo, err := os.Stat(rootDefault)
-			if os.IsNotExist(err){
-				// Our root default does not exist, do nothing
-			} else {
-				// Our root default does exist, add it to the results
-				if ! rootPathInfo.IsDir() {
-					results = append(results, rootDefault)
+
+			// scan each file path entry for files, then scan them for `default` files
+			pathFiles, err := ioutil.ReadDir(fullPath)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, file := range pathFiles {
+				if file.IsDir() {
+					// skip
 				} else {
-					// our root path is a file, somehow
+					if strings.HasPrefix(file.Name(), "default") {
+						results = append(results, fullPath + "/" + file.Name())
+					}
 				}
 			}
+			
+			// rootDefault := root + "/default"
+			
+			// rootPathInfo, err := os.Stat(rootDefault)
+			// if os.IsNotExist(err){
+			// 	// Our root default does not exist, do nothing
+			// } else {
+			// 	// Our root default does exist, add it to the results
+			// 	if ! rootPathInfo.IsDir() {
+			// 		results = append(results, rootDefault)
+			// 	} else {
+			// 		// our root path is a file, somehow
+			// 	}
+			// }
 			
 			dirElements := strings.Split(path, "/")
 			
@@ -478,15 +494,30 @@ func findDefaults(path string, root string) ([]string, error) {
 					return nil, err
 				} else {
 					if aPathInfo.IsDir() {
-						aPathDefault := aPath + "/default"
-						
-						_, err = os.Stat(aPathDefault)
-						if os.IsNotExist(err) {
-							// a defualt does not exist, do nothing
-						} else {
-							// A default *has* been found, add it to the list
-							results = append(results, aPathDefault)
+						pathFiles, err := ioutil.ReadDir(aPath)
+						if err != nil {
+							return nil, err
 						}
+
+						for _, file := range pathFiles {
+							if file.IsDir() {
+								// skip
+							} else {
+								if strings.HasPrefix(file.Name(), "default") {
+									results = append(results, aPath + "/" + file.Name())
+								}
+							}
+						}
+						
+						// aPathDefault := aPath + "/default"
+						
+						// _, err = os.Stat(aPathDefault)
+						// if os.IsNotExist(err) {
+						// 	// a defualt does not exist, do nothing
+						// } else {
+						// 	// A default *has* been found, add it to the list
+						// 	results = append(results, aPathDefault)
+						// }
 					} else {
 						// We found a file, not a directory.  You should never get here
 					}
