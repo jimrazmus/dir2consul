@@ -175,11 +175,17 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 		// Skip processing the root default file...
 
 		// Are we looking at the root default file?
-                if path == "default" ||
-			path == "default." + filepath.Ext(path) {
+                if filepath.Base(path) == "default" ||
+			filepath.Base(path) == "default." + filepath.Ext(path) {
 			// Yup ... skipping
+			if viper.GetBool("VERBOSE") {
+				log.Printf("Skipping default file: %s...", path)
+			}
 		} else if info.Mode().IsDir() {
 			// Skip this, too -- we care about processing files, and only files
+			if viper.GetBool("VERBOSE") {
+				log.Printf("Skipping directory -- not a file! %s...", path)
+			}
 		} else {
 		
 			// Find default files
