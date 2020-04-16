@@ -211,10 +211,10 @@ func TestFindDefaults(t *testing.T) {
 			os.Clearenv()
 			setupEnvironment()
 
-			err := os.Setenv("D2C_VERBOSE", "true")
-			if err != nil {
-				t.Fatal(err)
-			}
+			// err := os.Setenv("D2C_VERBOSE", "true")
+			// if err != nil {
+			// 	t.Fatal(err)
+			// }
 
 			results, err := findDefaults(tc.path, tc.root)
 
@@ -233,8 +233,12 @@ func TestFindDefaults(t *testing.T) {
 			for idx, x := range results {
 				if strings.HasPrefix(x, curWD) &&
 					strings.HasSuffix(x, tc.data[idx]) {
-					fmt.Println(x)
+					// We did!
+					// fmt.Println(x)
 				} else {
+					// If we don't sit under the current working directory AND
+					// have the path to the expected file as the last elements
+					// of your path, you do not match!
 					t.Errorf("findDefaults: %s does not match %s", x, tc.data[idx])
 				}
 			}
@@ -265,10 +269,10 @@ func TestMergeConfigurations(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	err := os.Setenv("D2C_VERBOSE", "true")
-	if err != nil {
-		t.Fatal(err)
-	}
+	// err := os.Setenv("D2C_VERBOSE", "true")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
 	curWD, err := os.Getwd()
 	if err != nil {
@@ -285,7 +289,14 @@ func TestMergeConfigurations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println("pass 1")
+	// You have to loop over both sets of keys, because otherwise you might have values in
+	// whatever you didn't loop over that you never check.  You don't just want all keys in a
+	// to have matching values in b, you also don't want any keys in b with any values that
+	// don't also appear in a.  Simplest way to approach that -- iterate over both sets of keys
+	// and compare values to the other.  You could make a merged list of keys, and then only
+	// do value comparisons once, but the differences would be marginal.
+
+	// fmt.Println("pass 1")
 	// check values of all keys in loaded data vs. test values, above.
 	for _, key := range v.AllKeys() {
 		lv := v.GetString(key)
@@ -294,11 +305,12 @@ func TestMergeConfigurations(t *testing.T) {
 		if lv != dv {
 			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
 		} else {
-			fmt.Println(key, "=", lv)
+			// Everybody matches, no error
+			// fmt.Println(key, "=", lv)
 		}
 	}
 
-	fmt.Println("pass 2")
+	// fmt.Println("pass 2")
 	// Check values of all keys in test values are in loaded values
 	for key, dv := range testValues {
 		lv := v.GetString(key)
@@ -306,7 +318,8 @@ func TestMergeConfigurations(t *testing.T) {
 		if lv != dv {
 			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
 		} else {
-			fmt.Println(key, "=", dv)
+			// Everybody matches, no error
+			// fmt.Println(key, "=", dv)
 		}
 	}
 }
@@ -324,10 +337,10 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	err := os.Setenv("D2C_VERBOSE", "true")
-	if err != nil {
-		t.Fatal(err)
-	}
+	// err := os.Setenv("D2C_VERBOSE", "true")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
 	curWD, err := os.Getwd()
 	if err != nil {
@@ -341,7 +354,14 @@ func TestLoadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println("pass 1")
+	// You have to loop over both sets of keys, because otherwise you might have values in
+	// whatever you didn't loop over that you never check.  You don't just want all keys in a
+	// to have matching values in b, you also don't want any keys in b with any values that
+	// don't also appear in a.  Simplest way to approach that -- iterate over both sets of keys
+	// and compare values to the other.  You could make a merged list of keys, and then only
+	// do value comparisons once, but the differences would be marginal.
+
+	// fmt.Println("pass 1")
 	// check values of all keys in loaded data vs. test values, above.
 	for _, key := range v.AllKeys() {
 		lv := v.GetString(key)
@@ -350,11 +370,12 @@ func TestLoadFile(t *testing.T) {
 		if lv != dv {
 			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
 		} else {
-			fmt.Println(key, "=", lv)
+			// Keys values match, which we desire
+			// fmt.Println(key, "=", lv)
 		}
 	}
 
-	fmt.Println("pass 2")
+	// fmt.Println("pass 2")
 	// Check values of all keys in test values are in loaded values
 	for key, dv := range testValues {
 		lv := v.GetString(key)
@@ -362,7 +383,8 @@ func TestLoadFile(t *testing.T) {
 		if lv != dv {
 			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
 		} else {
-			fmt.Println(key, "=", dv)
+			// Keys values match, which is what we want.
+			// fmt.Println(key, "=", dv)
 		}
 	}
 
