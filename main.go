@@ -128,11 +128,31 @@ func compileRegexps(dirPcre string, filePcre string) (*regexp.Regexp, *regexp.Re
 // loadKeyValuesFromDisk walks the file system and loads file contents into a kv.List
 func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe *regexp.Regexp) error {
 	// Change directory to where the files are located
-	err := os.Chdir(viper.GetString("DIRECTORY"))
+	curWD, err := os.Getwd()
 	if err != nil {
-		log.Fatal("Couldn't change directory to:", viper.GetString("DIRECTORY"))
+		log.Fatal("Couldn't get current working directory!")
 	}
-
+	if filepath.IsAbs(viper.GetString("DIRECTORY")){
+		// Our root directory is an absolute path and we can just move along...
+		err := os.Chdir(viper.GetString("DIRECTORY"))
+		if err != nil {
+			log.Fatal("Couldn't change directory to:", viper.GetString("DIRECTORY"))
+		}
+	} else {
+		// Our root directory is NOT an absolute path, so do some trickery here...
+		if strings.HasSuffix(curWD, viper.GetString("DIRECTORY")) {
+			// Our current working directory is already in our current path, do nothing
+		} else {
+			// Our current working directory doesn't appear to be where we want to be
+			// so try and move there...
+			err := os.Chdir(viper.GetString("DIRECTORY"))
+			if err != nil {
+				log.Fatal("Couldn't change directory to:", viper.GetString("DIRECTORY"))
+			}
+		}
+	}
+	// We should now be where we want to be, hopefully...
+	
 	// Walk the filesystem
 	return filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -198,8 +218,30 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				log.Printf("Error processing path %s: %s", pathRoot + "/" + pathPath, err)
 				return err
 			}
+
+			comboPath := pathRoot + "/" + path
+
+			var pathFull string
 			
-			pathFull := pathRoot + "/" + path
+			if filepath.IsAbs(comboPath) {
+				pathFull = comboPath
+			} else {
+				curWD, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				
+				if strings.HasSuffix(curWD, pathRoot) {
+					// We already have the pathRoot in our WD
+					pathFull = curWD + "/" + path
+				} else {
+					err = nil
+					pathFull, err = filepath.Abs(pathPath + "/" + path)
+					if err != nil {
+						return err
+					}
+				}
+			}
 			
 			// Add our path to the list, making it an ordered list of defaults + our file
 			// of interest
@@ -224,7 +266,8 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				v, err := mergeConfiguration(filesToParse)
 				if err != nil {
 					log.Printf("Error merging configs! %s", err)
-					return err
+					// return err
+					return nil
 				}
 				
 
@@ -264,7 +307,8 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				v, err := mergeConfiguration(filesToParse)
 				if err != nil {
 					log.Printf("Error merging configs! %s", err)
-					return err
+					// return err
+					return nil
 				}
 				
 
@@ -280,6 +324,8 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 					// Now that the default files are absorbed, absorb this whole file as a single property.
 					if info.Size() > 512000 {
 						log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+						// return fmt.Errorf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+						return nil
 					}
 					
 					elemVal, err := ioutil.ReadFile(path)
@@ -339,16 +385,46 @@ func deleteExtraConsulData(fileKeyValues *kv.List, consulKeyValues *kv.List, con
 	}
 }
 
-func findDefaults(path string, root string) ([]string, error) {
+func findDefaults(path string, rootProvided string) ([]string, error) {
 	var results []string
-	
-	fullPath := root + "/" + path
+	var fullPath string
+	var root string
+
+	if filepath.IsAbs(rootProvided) {
+		// We have an aboslute path, do the obvious
+		root = rootProvided
+	} else {
+		// We have a relative path.  Is that relative path part of the current path?
+
+		curWD, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+
+		if strings.HasSuffix(curWD, rootProvided) {
+			// our WD already includes our provided root
+			root = curWD
+		} else {
+			// our WD does *not* include our provided root
+			root, err = filepath.Abs(rootProvided)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if viper.GetBool("VERBOSE") {
+		log.Printf("At findDefaults with:\n  Path: %s\n  Root: %s\n   Abs: %s\n", path, rootProvided, root)
+	}
+
+	fullPath = root + "/" + path
 	
 	fullPathInfo, err := os.Stat(fullPath)
 
 	if viper.GetBool("VERBOSE") {
-		log.Printf("At findDefaults with:\n  Path: %s\n  Root: %s\n", path, root)
+		log.Printf("At findDefaults with:\n  Full Root: %s\n  Full Path: %s\n", root, fullPath)
 	}
+	
 	if os.IsNotExist(err) {
 		// Our path doesn't exist
 		return nil, err
