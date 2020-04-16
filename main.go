@@ -526,7 +526,7 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 	var viperList []viper.Viper
 	
 	// Make a viper object to hold the merged config
-	zfinal := viper.New()
+	zfinal := viper.NewWithOptions(viper.KeyDelimiter("/"))
 	
 	for _, z := range files {
 		
@@ -564,7 +564,7 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 }    
 
 func loadFile (path string) (*viper.Viper, error) {
-	results := viper.New()
+	results := viper.NewWithOptions(viper.KeyDelimiter("/"))
 	
 	elemKey := strings.TrimSuffix(path, filepath.Ext(path))
 	filetype := strings.TrimPrefix((strings.ToLower(filepath.Ext(path))), ".")

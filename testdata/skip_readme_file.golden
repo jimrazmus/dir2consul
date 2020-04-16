@@ -4,19 +4,19 @@ dir2consul/repo/b/b : b
 dir2consul/repo/b/test-text : b
 dir2consul/repo/bad-properties/no : such thing?
 dir2consul/repo/good-json/a : 1
-dir2consul/repo/good-json/b.boolean : true
-dir2consul/repo/good-json/b.number : 101
-dir2consul/repo/good-json/b.string : something
+dir2consul/repo/good-json/b/boolean : true
+dir2consul/repo/good-json/b/number : 101
+dir2consul/repo/good-json/b/string : something
 dir2consul/repo/good-json/c : [ 1, 2, 3]
-dir2consul/repo/good-json/d.for : kids
-dir2consul/repo/good-json/d.silly : rabbit
-dir2consul/repo/good-json/d.trixs : are
-dir2consul/repo/good-properties/app.name : dir2consul test
-dir2consul/repo/good-properties/app.network.host : shazam
-dir2consul/repo/good-properties/app.network.port : 65535
-dir2consul/repo/good-properties/db.password : password
-dir2consul/repo/good-properties/db.url : localhost:1234
-dir2consul/repo/good-properties/db.user : doritos
+dir2consul/repo/good-json/d/for : kids
+dir2consul/repo/good-json/d/silly : rabbit
+dir2consul/repo/good-json/d/trixs : are
+dir2consul/repo/good-properties/app/name : dir2consul test
+dir2consul/repo/good-properties/app/network/host : shazam
+dir2consul/repo/good-properties/app/network/port : 65535
+dir2consul/repo/good-properties/db/password : password
+dir2consul/repo/good-properties/db/url : localhost:1234
+dir2consul/repo/good-properties/db/user : doritos
 dir2consul/repo/good-properties/glibc_version : vanilla
 dir2consul/repo/good-properties/java_home : /you/live/here
 dir2consul/repo/good-properties/java_jce : standardOrNot
@@ -29,9 +29,9 @@ dir2consul/repo/good-properties/java_version_minor : yes
 dir2consul/repo/good-properties/lang : C.UTF-8
 dir2consul/repo/good-yaml/aboolean : true
 dir2consul/repo/good-yaml/astring : this is a normal string
-dir2consul/repo/good-yaml/basket.fruits : 
-dir2consul/repo/good-yaml/basket.nuts.crunchy : peanut
-dir2consul/repo/good-yaml/basket.nuts.tasty : almond
+dir2consul/repo/good-yaml/basket/fruits : 
+dir2consul/repo/good-yaml/basket/nuts/crunchy : peanut
+dir2consul/repo/good-yaml/basket/nuts/tasty : almond
 dir2consul/repo/good-yaml/bboolean : false
 dir2consul/repo/good-yaml/bstring : this is not a normal string\n
 dir2consul/repo/good-yaml/counting : 

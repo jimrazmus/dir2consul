@@ -243,6 +243,8 @@ func TestFindDefaults(t *testing.T) {
 }
 
 func TestMergeConfigurations(t *testing.T) {
+    os.Clearenv()
+    setupEnvironment()
 
 }
 
