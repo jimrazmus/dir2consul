@@ -7,6 +7,7 @@ import (
     "io/ioutil"
     "os"
     "regexp"
+    "strings"
     "testing"
 
     "github.com/jimrazmus/dir2consul/kv"
@@ -178,3 +179,73 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
         })
     }
 }
+
+func TestFindDefaults(t *testing.T) {
+    cases := []struct {
+        name   string
+        path   string
+        root   string
+        expect bool
+        data   []string
+    }{
+        {
+            "check_file",
+            "b.hcl",
+            "testdata/project-c/a",
+            false,
+            nil,
+        },
+        {
+            "check_path",
+            "project-c/a",
+            "testdata",
+            true,
+            []string{
+                0:"testdata/project-c/default.hcl",
+                1:"testdata/project-c/a/default.hcl",},
+        },
+    }
+
+    for i, tc := range cases {
+        t.Run(fmt.Sprintf("%d_%s", i, tc.name), func(t *testing.T) {
+            os.Clearenv()
+            setupEnvironment()
+            
+            err := os.Setenv("D2C_VERBOSE", "true")
+            if err != nil {
+                t.Fatal(err)
+            }
+            
+            results, err := findDefaults(tc.path, tc.root)
+
+            if err != nil {
+                if tc.expect {
+                    t.Fatal(err)
+                } else {
+                    // We expect to fail, which is technically a pass
+                }
+            }
+            curWD, err := os.Getwd()
+            if err != nil {
+                t.Fatal(err)
+            }
+            // FIXME
+            for idx, x := range results {
+                if strings.HasPrefix(x, curWD) &&
+                    strings.HasSuffix(x, tc.data[idx]){
+                    fmt.Println(x)
+                } else {
+                    t.Errorf("findDefaults: %s does not match %s", x, tc.data[idx])
+                }
+            }
+        })
+    }
+}
+
+func TestMergeConfigurations(t *testing.T) {
+
+}
+
+func TestLoadFile(t *testing.T) {
+}
+
