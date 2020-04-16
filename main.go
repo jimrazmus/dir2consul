@@ -87,24 +87,24 @@ func startupMessage() string {
 	env := os.Environ()
 	sort.Strings(env)
 	environment := fmt.Sprintf("\nEnvironment\n\t%s", strings.Join(env, "\n\t"))
-	// FIXME
+	// // FIXME
 
-	curDir, _ := os.Getwd()
-	log.Println(curDir)
+	// curDir, _ := os.Getwd()
+	// log.Println(curDir)
 
-	files, _ := ioutil.ReadDir(".")
+	// files, _ := ioutil.ReadDir(".")
 
-	for _, afile := range files {
-		log.Println(afile.Name())
-	}
+	// for _, afile := range files {
+	// 	log.Println(afile.Name())
+	// }
 
-	lfiles, _ := ioutil.ReadDir("local/")
+	// lfiles, _ := ioutil.ReadDir("local/")
 
-	for _, lfile := range lfiles {
-		log.Println(lfile.Name())
-	}
+	// for _, lfile := range lfiles {
+	// 	log.Println(lfile.Name())
+	// }
 
-	// EOFIXME
+	// // EOFIXME
 	return banner + config + environment
 }
 
@@ -291,7 +291,9 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				// to us in the viper object 'v'.
 				v, err := mergeConfiguration(filesToParse)
 				if err != nil {
-					log.Printf("Error merging configs! %s", err)
+					if viper.GetBool("VERBOSE") {
+						log.Printf("Error merging configs! %s", err)
+					}
 					// return err
 					return nil
 				}
@@ -336,8 +338,9 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				// NOTE:  Not our file of interest...
 				v, err := mergeConfiguration(filesToParse)
 				if err != nil {
-					log.Printf("Error merging configs! %s", err)
-					// return err
+					if viper.GetBool("VERBOSE") {
+						log.Printf("Error merging configs! %s", err)
+					}
 					return nil
 				}
 
@@ -356,8 +359,9 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				if defaultType == "" {
 					// Now that the default files are absorbed, absorb this whole file as a single property.
 					if info.Size() > 512000 {
-						log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
-						// return fmt.Errorf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+						if viper.GetBool("VERBOSE") {
+							log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+						}
 						return nil
 					}
 
@@ -657,7 +661,9 @@ func loadFile(path string) (*viper.Viper, error) {
 
 			// If the file is too big to fit into a consul value, error out.
 			if info.Size() > 512000 {
-				log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+				if viper.GetBool("VERBOSE") {
+					log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+				}
 				return nil, fmt.Errorf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
 			}
 
