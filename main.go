@@ -531,16 +531,6 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 	for _, z := range files {
 		
 		// For each file in our list, read it into a new viper object
-		// zv := viper.New()
-		
-		// zDir  := filepath.Dir(z)
-		// zFile := filepath.Base(z)
-		
-		// zv.SetConfigName(zFile)
-		// zv.AddConfigPath(zDir)
-		// zv.SetConfigType("properties")
-		
-		// err := zv.ReadInConfig()
 		zv, err := loadFile(z)
 		
 		if err != nil {

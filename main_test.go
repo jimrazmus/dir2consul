@@ -229,7 +229,7 @@ func TestFindDefaults(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			// FIXME
+			// Did we find the files we expected?
 			for idx, x := range results {
 				if strings.HasPrefix(x, curWD) &&
 					strings.HasSuffix(x, tc.data[idx]) {
@@ -243,10 +243,136 @@ func TestFindDefaults(t *testing.T) {
 }
 
 func TestMergeConfigurations(t *testing.T) {
+	testValues := map[string]string{
+		"def_one":        "1",
+		"def_two":        "2",
+		"def_three":      "3",
+		"default_four":   "4",
+		"default_five":   "5",
+		"default_six":    "6",
+		"override_one":   "a",
+		"override_two":   "b",
+		"override_three": "c",
+		"b_one":          "1",
+	}
+
+	fileList := []string{
+		"testdata/project-c/default.hcl",
+		"testdata/project-c/a/default.hcl",
+		"testdata/project-c/a/b.hcl",
+	}
+
 	os.Clearenv()
 	setupEnvironment()
 
+	err := os.Setenv("D2C_VERBOSE", "true")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	curWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for idx, x := range fileList {
+		x_abs := curWD + "/" + x
+		fileList[idx] = x_abs
+	}
+
+	v, err := mergeConfiguration(fileList)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println("pass 1")
+	// check values of all keys in loaded data vs. test values, above.
+	for _, key := range v.AllKeys() {
+		lv := v.GetString(key)
+		dv := testValues[key]
+
+		if lv != dv {
+			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
+		} else {
+			fmt.Println(key, "=", lv)
+		}
+	}
+
+	fmt.Println("pass 2")
+	// Check values of all keys in test values are in loaded values
+	for key, dv := range testValues {
+		lv := v.GetString(key)
+
+		if lv != dv {
+			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
+		} else {
+			fmt.Println(key, "=", dv)
+		}
+	}
 }
 
 func TestLoadFile(t *testing.T) {
+	testValues := map[string]string{
+		"def_one":        "1",
+		"def_two":        "2",
+		"def_three":      "3",
+		"override_one":   "a",
+		"override_two":   "a",
+		"override_three": "a",
+	}
+
+	os.Clearenv()
+	setupEnvironment()
+
+	err := os.Setenv("D2C_VERBOSE", "true")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	curWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testFile := "testdata/project-c/default.hcl"
+
+	v, err := loadFile(curWD + "/" + testFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println("pass 1")
+	// check values of all keys in loaded data vs. test values, above.
+	for _, key := range v.AllKeys() {
+		lv := v.GetString(key)
+		dv := testValues[key]
+
+		if lv != dv {
+			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
+		} else {
+			fmt.Println(key, "=", lv)
+		}
+	}
+
+	fmt.Println("pass 2")
+	// Check values of all keys in test values are in loaded values
+	for key, dv := range testValues {
+		lv := v.GetString(key)
+
+		if lv != dv {
+			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
+		} else {
+			fmt.Println(key, "=", dv)
+		}
+	}
+
 }
+
+// Emacs formatting variables
+
+// Local Variables:
+// mode: go
+// tab-width: 8
+// indent-tabs-mode: t
+// standard-indent: 8
+// End:
