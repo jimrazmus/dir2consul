@@ -1,54 +1,65 @@
 name: Go
-on: [push]
+on:
+  push:
+    branchs:
+      - master
+    tags:
+      - v*
+  pull_request:
+
 jobs:
 
-  format:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Set up Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.14
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Format
-      run: go fmt .
-  
   test:
-    needs: [format]
-    strategy:
-      matrix:
-        go-version: [1.14.x]
-        platform: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.14
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
       - name: Get dependencies
-        run: |
-          go mod download
+        run: go mod download
+      - name: Format
+        run: go fmt .
       - name: Test
         run: |
           go test ./...
           go test -race ./...
 
   coverage:
-    needs: [format,test]
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.14
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Measure
-      run: go test -v -covermode=atomic -coverprofile=coverage.out ./...
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.out
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Measure
+        run: go test -v -covermode=atomic -coverprofile=coverage.out ./...
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.out
+  
+  publish:
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Build Docker Image
+        run: docker build . --file Dockerfile --tag image
+      - name: Log into registry
+        run: echo "${{ github.token }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+      - name: Push Image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [ "$VERSION" == "master" ] && VERSION=rc
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
