@@ -138,7 +138,7 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			os.Setenv("D2C_ENVIRONMENT", "true")
+			os.Setenv("D2C_VERBOSE", "true")
 
 			var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 			dirIgnoreRe, err = regexp.Compile(tc.dre)
@@ -262,7 +262,7 @@ func TestMergeConfigurations(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_ENVIRONMENT", "true")
+	os.Setenv("D2C_VERBOSE", "true")
 
 	curWD, err := os.Getwd()
 	if err != nil {
@@ -323,7 +323,7 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_ENVIRONMENT", "true")
+	os.Setenv("D2C_VERBOSE", "true")
 
 	curWD, err := os.Getwd()
 	if err != nil {
