@@ -379,4 +379,14 @@ func TestLoadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	for idx, key := range v2.AllKeys() {
+		// We should only have one key...
+		if idx > 0 {
+			t.Errorf("We got more than 1 key on a typeless default file being loaded as a blob...")
+		} else {
+			if viper.GetBool("VERBOSE") {
+				fmt.Println(idx, key, "=", v2.GetString(key))
+			}
+		}
+	}
 }
