@@ -39,8 +39,17 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 ############################
 FROM scratch
 
-LABEL "repository"="https://github.com/jimrazmus/dir2consul"
-LABEL "maintainer"="Jim Razmus II <jim.razmus@gmail.com>"
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
+
+LABEL "maintainer"="Empower Rangers <empower-rangers@code42.com>"
+LABEL "org.label-schema.schema-version"="1.0"
+LABEL "org.label-schema.build-date"=$BUILD_DATE
+LABEL "org.label-schema.vcs-ref"=$VCS_REF
+LABEL "org.label-schema.vcs-url"=$VCS_URL
+LABEL "org.label-schema.version"=$VERSION
 
 # Import from builder.
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo

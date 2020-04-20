@@ -52,7 +52,17 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
       - name: Build Docker Image
-        run: docker build . --file Dockerfile --tag image
+        run: |
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          VCS_REF=${{ github.sha }}
+          VSC_URL=https://github.com/${{ github.repository }}
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [ "$VERSION" == "master" ] && VERSION=rc
+          docker build . --file Dockerfile --tag image \
+            --build-arg BUILD_DATE=$BUILD_DATE \
+            --build-arg VCS_REF=$VCS_REF \
+            --build-arg VCS_URL=$VCS_URL \
+            --build-arg VERSION=$VERSION
       - name: Log into registry
         run: echo "${{ github.token }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
       - name: Push Image
