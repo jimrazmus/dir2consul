@@ -1,0 +1,22 @@
+---
+anull: ~
+bnull: null
+aboolean: True
+bboolean: False
+light: On
+TV: Off
+astring: this is a normal string
+bstring:  this is not a normal string\n
+numbers: "[ 1, 2, 3, 4, 5 ]"
+counting: [ "one", "two", "three", "four" ]
+fruits:
+    - apple
+    - banana
+    - kiwi
+basket:
+    fruits:
+        - apple
+        - banana
+    nuts: 
+        crunchy: peanut
+        tasty: almond

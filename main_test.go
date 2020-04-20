@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/jimrazmus/dir2consul/kv"
@@ -136,6 +137,10 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// err = os.Setenv("D2C_VERBOSE", "true")
+			// if err != nil {
+			//     t.Fatal(err)
+			// }
 			var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 			dirIgnoreRe, err = regexp.Compile(tc.dre)
 			if err != nil {
@@ -149,6 +154,8 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer os.Chdir(old)
+
 			actual := kv.NewList()
 			err = loadKeyValuesFromDisk(actual, dirIgnoreRe, fileIgnoreRe)
 			if err != nil {
@@ -172,3 +179,222 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 		})
 	}
 }
+
+func TestFindDefaults(t *testing.T) {
+	cases := []struct {
+		name   string
+		path   string
+		root   string
+		expect bool
+		data   []string
+	}{
+		{
+			"check_file",
+			"b.hcl",
+			"testdata/project-c/a",
+			false,
+			nil,
+		},
+		{
+			"check_path",
+			"project-c/a",
+			"testdata",
+			true,
+			[]string{
+				0: "testdata/project-c/default.hcl",
+				1: "testdata/project-c/a/default.hcl"},
+		},
+	}
+
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("%d_%s", i, tc.name), func(t *testing.T) {
+			os.Clearenv()
+			setupEnvironment()
+
+			// err := os.Setenv("D2C_VERBOSE", "true")
+			// if err != nil {
+			// 	t.Fatal(err)
+			// }
+
+			results, err := findDefaults(tc.path, tc.root)
+
+			if err != nil {
+				if tc.expect {
+					t.Fatal(err)
+				} else {
+					// We expect to fail, which is technically a pass
+				}
+			}
+			curWD, err := os.Getwd()
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Did we find the files we expected?
+			for idx, x := range results {
+				if strings.HasPrefix(x, curWD) &&
+					strings.HasSuffix(x, tc.data[idx]) {
+					// We did!
+					// fmt.Println(x)
+				} else {
+					// If we don't sit under the current working directory AND
+					// have the path to the expected file as the last elements
+					// of your path, you do not match!
+					t.Errorf("findDefaults: %s does not match %s", x, tc.data[idx])
+				}
+			}
+		})
+	}
+}
+
+func TestMergeConfigurations(t *testing.T) {
+	testValues := map[string]string{
+		"def_one":        "1",
+		"def_two":        "2",
+		"def_three":      "3",
+		"default_four":   "4",
+		"default_five":   "5",
+		"default_six":    "6",
+		"override_one":   "a",
+		"override_two":   "b",
+		"override_three": "c",
+		"b_one":          "1",
+	}
+
+	fileList := []string{
+		"testdata/project-c/default.hcl",
+		"testdata/project-c/a/default.hcl",
+		"testdata/project-c/a/b.hcl",
+	}
+
+	os.Clearenv()
+	setupEnvironment()
+
+	// err := os.Setenv("D2C_VERBOSE", "true")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	curWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for idx, x := range fileList {
+		x_abs := curWD + "/" + x
+		fileList[idx] = x_abs
+	}
+
+	v, err := mergeConfiguration(fileList)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// You have to loop over both sets of keys, because otherwise you might have values in
+	// whatever you didn't loop over that you never check.  You don't just want all keys in a
+	// to have matching values in b, you also don't want any keys in b with any values that
+	// don't also appear in a.  Simplest way to approach that -- iterate over both sets of keys
+	// and compare values to the other.  You could make a merged list of keys, and then only
+	// do value comparisons once, but the differences would be marginal.
+
+	// fmt.Println("pass 1")
+	// check values of all keys in loaded data vs. test values, above.
+	for _, key := range v.AllKeys() {
+		lv := v.GetString(key)
+		dv := testValues[key]
+
+		if lv != dv {
+			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
+		} else {
+			// Everybody matches, no error
+			// fmt.Println(key, "=", lv)
+		}
+	}
+
+	// fmt.Println("pass 2")
+	// Check values of all keys in test values are in loaded values
+	for key, dv := range testValues {
+		lv := v.GetString(key)
+
+		if lv != dv {
+			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
+		} else {
+			// Everybody matches, no error
+			// fmt.Println(key, "=", dv)
+		}
+	}
+}
+
+func TestLoadFile(t *testing.T) {
+	testValues := map[string]string{
+		"def_one":        "1",
+		"def_two":        "2",
+		"def_three":      "3",
+		"override_one":   "a",
+		"override_two":   "a",
+		"override_three": "a",
+	}
+
+	os.Clearenv()
+	setupEnvironment()
+
+	// err := os.Setenv("D2C_VERBOSE", "true")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+
+	curWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testFile := "testdata/project-c/default.hcl"
+
+	v, err := loadFile(curWD + "/" + testFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// You have to loop over both sets of keys, because otherwise you might have values in
+	// whatever you didn't loop over that you never check.  You don't just want all keys in a
+	// to have matching values in b, you also don't want any keys in b with any values that
+	// don't also appear in a.  Simplest way to approach that -- iterate over both sets of keys
+	// and compare values to the other.  You could make a merged list of keys, and then only
+	// do value comparisons once, but the differences would be marginal.
+
+	// fmt.Println("pass 1")
+	// check values of all keys in loaded data vs. test values, above.
+	for _, key := range v.AllKeys() {
+		lv := v.GetString(key)
+		dv := testValues[key]
+
+		if lv != dv {
+			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
+		} else {
+			// Keys values match, which we desire
+			// fmt.Println(key, "=", lv)
+		}
+	}
+
+	// fmt.Println("pass 2")
+	// Check values of all keys in test values are in loaded values
+	for key, dv := range testValues {
+		lv := v.GetString(key)
+
+		if lv != dv {
+			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
+		} else {
+			// Keys values match, which is what we want.
+			// fmt.Println(key, "=", dv)
+		}
+	}
+
+}
+
+// Emacs formatting variables
+
+// Local Variables:
+// mode: go
+// tab-width: 8
+// indent-tabs-mode: t
+// standard-indent: 8
+// End:
