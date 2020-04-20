@@ -370,7 +370,7 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_ENVIRONMENT", "true")
+	os.Setenv("D2C_VERBOSE", "true")
 
 	secondTest := "testdata/project-c/b/default"
 
@@ -389,4 +389,46 @@ func TestLoadFile(t *testing.T) {
 			}
 		}
 	}
+
+	os.Clearenv()
+	setupEnvironment()
+
+	os.Setenv("D2C_VERBOSE", "true")
+	os.Setenv("DEFAULT_CONFIG_TYPE", "properties")
+
+	thirdTest := "testdata/project-c/b/default"
+
+	v3, err := loadFile(curWD + "/" + thirdTest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for idx, key := range v3.AllKeys() {
+		// We should get two keys...
+
+		if idx > 1 {
+			t.Error("We got more than 2 keys on a default type file being loaded as properties with two properties in it!")
+		} else {
+			if viper.GetBool("VERBOSE") {
+				fmt.Println(idx, key, "=", v3.GetString(key))
+			}
+		}
+	}
+
+	os.Clearenv()
+	setupEnvironment()
+
+	os.Setenv("D2C_VERBOSE", "true")
+
+	fourthTest := "testdata/project-b/repo/toobig"
+
+	v4, err := loadFile(curWD + "/" + fourthTest)
+	if v4 != nil {
+		t.Error("We should have gotten a too big error here, and we didn't...")
+	}
+
+	if err != nil {
+		fmt.Println("Got a desired error: ", err)
+	}
+
 }
