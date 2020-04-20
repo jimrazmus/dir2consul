@@ -4,6 +4,7 @@
 ------------
 Configuration
 	D2C_CONSUL_KEY_PREFIX: dir2consul
+	D2C_DEFAULT_CONFIG_TYPE: 
 	D2C_DIRECTORY: local/repo
 	D2C_DRYRUN: false
 	D2C_IGNORE_DIR_REGEX: a^
