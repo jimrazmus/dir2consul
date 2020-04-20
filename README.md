@@ -20,12 +20,12 @@ Likewise, the specific properties will be augmented with the contents of files n
 dir2consul uses environment variables to override default configuration values. The variables are:
 
 * D2C_CONSUL_KEY_PREFIX is the path to prepend to all Consul keys. Default: "dir2consul"
+* DC2_DEFAULT_CONFIG_TYPE is a type to apply to files with no extension. Default: "" (ie, no value)
 * D2C_DIRECTORY is the directory dir2consul will walk. Default: "local/repo"
 * D2C_DRYRUN is a flag that prevents all Consul data modification. Set it to any truthy value to enable. Default: "false"
 * D2C_IGNORE_DIR_REGEX is a PCRE regular expression that matches directories we ignore when walking the file system. The default value is impossible to match. Default: "a^"
 * D2C_IGNORE_FILE_REGEX is a PCRE regular expression that matches files we ignore when walking the file system. Default: "README.md"
 * D2C_VERBOSE is a flag that increases log output. Set it to any truthy value to enable. Default: "false"
-* DC2_DEFAULT_CONFIG_TYPE is a type to apply to files with no extension. Default: "" (ie, no value)
 
 Consul specific configuration variables are documented [here](https://www.consul.io/docs/commands/index.html#environment-variables) and may be used to customize dir2consul connectivity to a Consul server.
 
