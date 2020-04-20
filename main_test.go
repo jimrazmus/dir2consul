@@ -137,10 +137,7 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			// err = os.Setenv("D2C_VERBOSE", "true")
-			// if err != nil {
-			//     t.Fatal(err)
-			// }
+
 			var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 			dirIgnoreRe, err = regexp.Compile(tc.dre)
 			if err != nil {
@@ -211,11 +208,6 @@ func TestFindDefaults(t *testing.T) {
 			os.Clearenv()
 			setupEnvironment()
 
-			// err := os.Setenv("D2C_VERBOSE", "true")
-			// if err != nil {
-			// 	t.Fatal(err)
-			// }
-
 			results, err := findDefaults(tc.path, tc.root)
 
 			if err != nil {
@@ -234,7 +226,6 @@ func TestFindDefaults(t *testing.T) {
 				if strings.HasPrefix(x, curWD) &&
 					strings.HasSuffix(x, tc.data[idx]) {
 					// We did!
-					// fmt.Println(x)
 				} else {
 					// If we don't sit under the current working directory AND
 					// have the path to the expected file as the last elements
@@ -269,11 +260,6 @@ func TestMergeConfigurations(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	// err := os.Setenv("D2C_VERBOSE", "true")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-
 	curWD, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -296,7 +282,6 @@ func TestMergeConfigurations(t *testing.T) {
 	// and compare values to the other.  You could make a merged list of keys, and then only
 	// do value comparisons once, but the differences would be marginal.
 
-	// fmt.Println("pass 1")
 	// check values of all keys in loaded data vs. test values, above.
 	for _, key := range v.AllKeys() {
 		lv := v.GetString(key)
@@ -306,11 +291,9 @@ func TestMergeConfigurations(t *testing.T) {
 			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
 		} else {
 			// Everybody matches, no error
-			// fmt.Println(key, "=", lv)
 		}
 	}
 
-	// fmt.Println("pass 2")
 	// Check values of all keys in test values are in loaded values
 	for key, dv := range testValues {
 		lv := v.GetString(key)
@@ -319,7 +302,6 @@ func TestMergeConfigurations(t *testing.T) {
 			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
 		} else {
 			// Everybody matches, no error
-			// fmt.Println(key, "=", dv)
 		}
 	}
 }
@@ -336,11 +318,6 @@ func TestLoadFile(t *testing.T) {
 
 	os.Clearenv()
 	setupEnvironment()
-
-	// err := os.Setenv("D2C_VERBOSE", "true")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
 
 	curWD, err := os.Getwd()
 	if err != nil {
@@ -361,7 +338,6 @@ func TestLoadFile(t *testing.T) {
 	// and compare values to the other.  You could make a merged list of keys, and then only
 	// do value comparisons once, but the differences would be marginal.
 
-	// fmt.Println("pass 1")
 	// check values of all keys in loaded data vs. test values, above.
 	for _, key := range v.AllKeys() {
 		lv := v.GetString(key)
@@ -371,11 +347,9 @@ func TestLoadFile(t *testing.T) {
 			t.Errorf("For key %s, %s does not equal %s", key, lv, dv)
 		} else {
 			// Keys values match, which we desire
-			// fmt.Println(key, "=", lv)
 		}
 	}
 
-	// fmt.Println("pass 2")
 	// Check values of all keys in test values are in loaded values
 	for key, dv := range testValues {
 		lv := v.GetString(key)
@@ -384,17 +358,8 @@ func TestLoadFile(t *testing.T) {
 			t.Errorf("for key %s, %s does not equal %s", key, dv, lv)
 		} else {
 			// Keys values match, which is what we want.
-			// fmt.Println(key, "=", dv)
 		}
 	}
 
 }
 
-// Emacs formatting variables
-
-// Local Variables:
-// mode: go
-// tab-width: 8
-// indent-tabs-mode: t
-// standard-indent: 8
-// End:

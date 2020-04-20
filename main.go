@@ -87,24 +87,6 @@ func startupMessage() string {
 	env := os.Environ()
 	sort.Strings(env)
 	environment := fmt.Sprintf("\nEnvironment\n\t%s", strings.Join(env, "\n\t"))
-	// // FIXME
-
-	// curDir, _ := os.Getwd()
-	// log.Println(curDir)
-
-	// files, _ := ioutil.ReadDir(".")
-
-	// for _, afile := range files {
-	// 	log.Println(afile.Name())
-	// }
-
-	// lfiles, _ := ioutil.ReadDir("local/")
-
-	// for _, lfile := range lfiles {
-	// 	log.Println(lfile.Name())
-	// }
-
-	// // EOFIXME
 	return banner + config + environment
 }
 
@@ -294,7 +276,6 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 					if viper.GetBool("VERBOSE") {
 						log.Printf("Error merging configs! %s", err)
 					}
-					// return err
 					return nil
 				}
 
@@ -577,9 +558,6 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 	// file in the third element of the array, you would end up with the value from that
 	// third file.  It would override the value in the first.
 
-	// Make an array of viper objects
-	var viperList []viper.Viper
-
 	// Make a viper object to hold the merged config
 	zfinal := viper.NewWithOptions(viper.KeyDelimiter("/"))
 
@@ -591,9 +569,6 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 		if err != nil {
 			return nil, fmt.Errorf("Fatal error config file %s: %s\n", z, err)
 		}
-
-		// Add this viper object to our array of viper objects
-		viperList = append(viperList, *zv)
 
 		zvSettings := zv.AllSettings()
 
@@ -696,11 +671,3 @@ func loadFile(path string) (*viper.Viper, error) {
 	return results, nil
 }
 
-// Emacs formatting variables
-
-// Local Variables:
-// mode: go
-// tab-width: 8
-// indent-tabs-mode: t
-// standard-indent: 8
-// End:
