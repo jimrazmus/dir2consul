@@ -670,4 +670,3 @@ func loadFile(path string) (*viper.Viper, error) {
 
 	return results, nil
 }
-
