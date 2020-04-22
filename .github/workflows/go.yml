@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
       - name: Get dependencies
         run: go mod download
@@ -38,11 +38,11 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
-      - name: Measure
+      - name: Measure Coverage
         run: go test -v -covermode=atomic -coverprofile=coverage.out ./...
-      - name: Upload coverage to Codecov
+      - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.out
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DockerHubToken }}" | docker login -u ${{ secrets.DockerHubUsername }} --password-stdin
