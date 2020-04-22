@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
       - name: Get dependencies
         run: go mod download
@@ -38,11 +38,11 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
-      - name: Measure
+      - name: Measure Coverage
         run: go test -v -covermode=atomic -coverprofile=coverage.out ./...
-      - name: Upload coverage to Codecov
+      - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.out
@@ -52,13 +52,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
-      - name: Check out code into the Go module directory
+      - name: Check out Source Code
         uses: actions/checkout@v2
-      - name: Build Docker Image
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DockerHubToken }}" | docker login -u ${{ secrets.DockerHubUsername }} --password-stdin
+      - name: Build and Push Docker Image
         run: |
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          IMAGE_ID=$(echo $IMAGE_NAME | tr '[A-Z]' '[a-z]')
           VCS_REF=${{ github.sha }}
-          VSC_URL=https://github.com/${{ github.repository }}
+          VCS_URL=https://github.com/${{ github.repository }}
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           [ "$VERSION" == "master" ] && VERSION=rc
           docker build . \
@@ -66,13 +69,5 @@ jobs:
             --build-arg VCS_REF=$VCS_REF \
             --build-arg VCS_URL=$VCS_URL \
             --build-arg VERSION=$VERSION \
-            --file Dockerfile --tag image
-      - name: Log into registry
-        run: echo "${{ secrets.DockerHubToken }}" | docker login -u ${{ secrets.DockerHubUsername }} --password-stdin
-      - name: Push Image
-        run: |
-          IMAGE_ID=$(echo $IMAGE_NAME | tr '[A-Z]' '[a-z]')
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          [ "$VERSION" == "master" ] && VERSION=rc
-          docker tag image $IMAGE_ID:$VERSION
+            --file Dockerfile --tag $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
