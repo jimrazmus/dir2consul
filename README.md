@@ -40,7 +40,7 @@ docker run -v $(PWD):/local \
   --env CONSUL_HTTP_ADDR=consul.example.com:8500 \
   --env D2C_CONSUL_KEY_PREFIX=some/specific/kv/path \
   --env D2C_DRYRUN=true \
-  jimrazmus/dir2consul:v1.4.1
+  code42software/dir2consul:v1.5.0
 ```
 
 ## Contributing

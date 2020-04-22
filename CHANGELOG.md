@@ -2,8 +2,42 @@
 ## [Unreleased]
 
 
+<a name="v1.5.0"></a>
+## [v1.5.0] - 2020-04-22
+### Build
+- revert attempt to parameterize go-version It doesn't work.
+- parameterize go-version
+- improve readability
+- First log in, then do a combined build and push
+- ditch github packages for hub.docker.com GitHub packages does not allow un-authenticated docker pull of packages in "public" repos.
+- conform to github image naming ([#27](https://github.com/jimrazmus/dir2consul/issues/27))
+- fix typo that broke the push workflow ([#26](https://github.com/jimrazmus/dir2consul/issues/26))
+- use build args to label the docker image ([#25](https://github.com/jimrazmus/dir2consul/issues/25))
+- simplify workflow and add image publishing ([#24](https://github.com/jimrazmus/dir2consul/issues/24))
+- Create the CODEOWNERS file
+- no codecov token required for public repos
+- **deps:** bump github.com/spf13/viper from 1.6.2 to 1.6.3
+
+### Chore
+- use 'standard' docker image labels ([#28](https://github.com/jimrazmus/dir2consul/issues/28))
+
+### Docs
+- dir2consul in now a Code42 OS project
+
+### Feat
+- Add processing of the "default" functionality ([#23](https://github.com/jimrazmus/dir2consul/issues/23))
+
+### Pull Requests
+- Merge pull request [#30](https://github.com/jimrazmus/dir2consul/issues/30) from code42/improve-publish
+- Merge pull request [#29](https://github.com/jimrazmus/dir2consul/issues/29) from code42/goodbye-packages
+- Merge pull request [#21](https://github.com/jimrazmus/dir2consul/issues/21) from code42/dependabot/go_modules/github.com/spf13/viper-1.6.3
+
+
 <a name="v1.4.1"></a>
-## [v1.4.1] - 2020-03-17
+## [v1.4.1] - 2020-03-19
+### Chore
+- update changelog
+
 ### Fix
 - Remove the D2C_ prefix from viper calls
 
@@ -133,7 +167,8 @@
 - Merge pull request [#1](https://github.com/jimrazmus/dir2consul/issues/1) from jimrazmus/simple
 
 
-[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.5.0...HEAD
+[v1.5.0]: https://github.com/jimrazmus/dir2consul/compare/v1.4.1...v1.5.0
 [v1.4.1]: https://github.com/jimrazmus/dir2consul/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/jimrazmus/dir2consul/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/jimrazmus/dir2consul/compare/v1.2.0...v1.3.0
