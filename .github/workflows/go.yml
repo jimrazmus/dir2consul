@@ -9,6 +9,7 @@ on:
 
 env:
   IMAGE_NAME: code42software/dir2consul
+  GO_VERSION: 1.14
 
 jobs:
 
@@ -18,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.14
+          go-version: $GO_VERSION
       - name: Check out Source Code
         uses: actions/checkout@v2
       - name: Get dependencies
@@ -37,7 +38,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.14
+          go-version: $GO_VERSION
       - name: Check out Source Code
         uses: actions/checkout@v2
       - name: Measure Coverage
