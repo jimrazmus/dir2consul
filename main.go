@@ -172,15 +172,7 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 			return nil
 		}
 
-		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
-
-		filetype := strings.TrimPrefix((strings.ToLower(filepath.Ext(path))), ".")
-
-		if viper.GetBool("VERBOSE") {
-			log.Println("\n\n" + path + "\n  - " + elemKey + "\n")
-		}
-
-		// Are we looking at a file, or a default file?
+		// Skip over "default" files
 		if filepath.Base(path) == "default" ||
 			filepath.Base(path) == "default"+filepath.Ext(path) {
 			// We have a default file with some extension... skipping
@@ -191,6 +183,14 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				log.Printf("Skipping default file: %s...", path)
 			}
 			return nil
+		}
+
+		elemKey := strings.TrimSuffix(path, filepath.Ext(path))
+
+		filetype := strings.TrimPrefix((strings.ToLower(filepath.Ext(path))), ".")
+
+		if viper.GetBool("VERBOSE") {
+			log.Println("\n\n" + path + "\n  - " + elemKey + "\n")
 		}
 
 		// We have found a file, and it's not named default, or default.<ext>
