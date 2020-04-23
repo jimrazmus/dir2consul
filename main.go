@@ -494,36 +494,36 @@ func findDefaults(path string, rootProvided string) ([]string, error) {
 			if os.IsNotExist(err) {
 				// You should never get here
 				return nil, err
-			} else {
-				if aPathInfo.IsDir() {
-					pathFiles, err := ioutil.ReadDir(aPath)
-					if err != nil {
-						return nil, err
-					}
+			}
 
-					defaultIndex := 0
+			if aPathInfo.IsDir() {
+				pathFiles, err := ioutil.ReadDir(aPath)
+				if err != nil {
+					return nil, err
+				}
 
-					for _, file := range pathFiles {
-						if file.IsDir() {
-							// skip
-						} else {
-							if file.Name() == "default" ||
-								file.Name() == "default"+filepath.Ext(file.Name()) {
-								results = append(results, aPath+"/"+file.Name())
-								if viper.GetBool("VERBOSE") {
-									log.Printf(" ... %s", aPath+"/"+file.Name())
-								}
-								defaultIndex++
+				defaultIndex := 0
+
+				for _, file := range pathFiles {
+					if file.IsDir() {
+						// skip
+					} else {
+						if file.Name() == "default" ||
+							file.Name() == "default"+filepath.Ext(file.Name()) {
+							results = append(results, aPath+"/"+file.Name())
+							if viper.GetBool("VERBOSE") {
+								log.Printf(" ... %s", aPath+"/"+file.Name())
 							}
+							defaultIndex++
 						}
 					}
-
-					if defaultIndex > 1 {
-						return nil, fmt.Errorf("Multilple default files found in %s", aPath)
-					}
-				} else {
-					// We found a file, not a directory.  You should never get here
 				}
+
+				if defaultIndex > 1 {
+					return nil, fmt.Errorf("Multilple default files found in %s", aPath)
+				}
+			} else {
+				// We found a file, not a directory.  You should never get here
 			}
 
 		} // end of range
