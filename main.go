@@ -468,7 +468,7 @@ func findDefaults(path string, rootProvided string) ([]string, error) {
 			// NOTE:  "default.txt" or "default.excel" or whatever...
 			// NOTE:  This should probably be much smoother.
 			if defaultIndex > 1 {
-				return nil, fmt.Errorf("Multiple default files found in %s!", fullPath)
+				return nil, fmt.Errorf("Multiple default files found in %s", fullPath)
 			}
 
 			// Take our path and split it up into component parts.  Then iterate over them, checking each level
@@ -556,7 +556,7 @@ func mergeConfiguration(files []string) (config *viper.Viper, err error) {
 		zv, err := loadFile(z)
 
 		if err != nil {
-			return nil, fmt.Errorf("Fatal error config file %s: %s\n", z, err)
+			return nil, fmt.Errorf("Fatal error config file %s: %s", z, err)
 		}
 
 		zvSettings := zv.AllSettings()
@@ -601,7 +601,7 @@ func loadFile(path string) (*viper.Viper, error) {
 
 		err := results.ReadInConfig()
 		if err != nil {
-			return nil, fmt.Errorf("Fatal error config file %s: %s\n", path, err)
+			return nil, fmt.Errorf("Fatal error config file %s: %s", path, err)
 		}
 	default:
 		if defaultType == "" {
@@ -652,7 +652,7 @@ func loadFile(path string) (*viper.Viper, error) {
 
 			err := results.ReadInConfig()
 			if err != nil {
-				return nil, fmt.Errorf("Fatal error config file %s: %s\n", path, err)
+				return nil, fmt.Errorf("Fatal error config file %s: %s", path, err)
 			}
 		}
 	}
