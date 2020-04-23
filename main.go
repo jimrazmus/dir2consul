@@ -180,8 +180,6 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 			log.Println("\n\n" + path + "\n  - " + elemKey + "\n")
 		}
 
-		// Skip processing the root default file -- we only want to process *non* default files directly.
-
 		// Are we looking at a file, or a default file?
 		if filepath.Base(path) == "default" ||
 			filepath.Base(path) == "default"+filepath.Ext(path) {
