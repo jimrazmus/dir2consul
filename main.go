@@ -438,100 +438,100 @@ func findDefaults(path string, rootProvided string) ([]string, error) {
 	if os.IsNotExist(err) {
 		// Our path doesn't exist
 		return nil, err
-	} else {
-		if fullPathInfo.IsDir() {
+	}
 
-			// scan each file path entry for files, then scan them for `default` files
-			pathFiles, err := ioutil.ReadDir(root)
-			if err != nil {
-				return nil, err
-			}
+	if fullPathInfo.IsDir() {
 
-			defaultIndex := 0
-			for _, file := range pathFiles {
-				if file.IsDir() {
-					// skip
-				} else {
-					if file.Name() == "default" ||
-						file.Name() == "default"+filepath.Ext(file.Name()) {
-						results = append(results, root+"/"+file.Name())
-						if viper.GetBool("VERBOSE") {
-							log.Printf(" --- %s", root+"/"+file.Name())
-						}
-						defaultIndex++
-					}
-				}
-			}
-			// If we have more than one file named "default" or "default.<ext>" at a given level in the
-			// directory hierarchy, the precedence of applying them is uncertain.  Fail.
-			// NOTE:  This will also die if we don't know what kind of files they are, like if they are named
-			// NOTE:  "default.txt" or "default.excel" or whatever...
-			// NOTE:  This should probably be much smoother.
-			if defaultIndex > 1 {
-				return nil, fmt.Errorf("Multiple default files found in %s", fullPath)
-			}
-
-			// Take our path and split it up into component parts.  Then iterate over them, checking each level
-			// for default files.
-			dirElements := strings.Split(path, "/")
-
-			var dirConcat string
-
-			for idx, a := range dirElements {
-				// Iterate over path elements, looking for a `default` file in each one...
-				if idx == 0 {
-					dirConcat = a
-				} else {
-					dirConcat = dirConcat + "/" + a
-				}
-
-				// Full path of the element we're currently at
-				aPath := root + "/" + dirConcat
-
-				// Does this exist?  it really should, but worse things happen at sea...
-				aPathInfo, err := os.Stat(aPath)
-				if os.IsNotExist(err) {
-					// You should never get here
-					return nil, err
-				} else {
-					if aPathInfo.IsDir() {
-						pathFiles, err := ioutil.ReadDir(aPath)
-						if err != nil {
-							return nil, err
-						}
-
-						defaultIndex := 0
-
-						for _, file := range pathFiles {
-							if file.IsDir() {
-								// skip
-							} else {
-								if file.Name() == "default" ||
-									file.Name() == "default"+filepath.Ext(file.Name()) {
-									results = append(results, aPath+"/"+file.Name())
-									if viper.GetBool("VERBOSE") {
-										log.Printf(" ... %s", aPath+"/"+file.Name())
-									}
-									defaultIndex++
-								}
-							}
-						}
-
-						if defaultIndex > 1 {
-							return nil, fmt.Errorf("Multilple default files found in %s", aPath)
-						}
-					} else {
-						// We found a file, not a directory.  You should never get here
-					}
-				}
-
-			} // end of range
-
-		} else {
-			// We want to be parsing a path.  We should be called with a root and a path and that's it.
-			err := errors.New("findDefaults called with file instead of path")
+		// scan each file path entry for files, then scan them for `default` files
+		pathFiles, err := ioutil.ReadDir(root)
+		if err != nil {
 			return nil, err
 		}
+
+		defaultIndex := 0
+		for _, file := range pathFiles {
+			if file.IsDir() {
+				// skip
+			} else {
+				if file.Name() == "default" ||
+					file.Name() == "default"+filepath.Ext(file.Name()) {
+					results = append(results, root+"/"+file.Name())
+					if viper.GetBool("VERBOSE") {
+						log.Printf(" --- %s", root+"/"+file.Name())
+					}
+					defaultIndex++
+				}
+			}
+		}
+		// If we have more than one file named "default" or "default.<ext>" at a given level in the
+		// directory hierarchy, the precedence of applying them is uncertain.  Fail.
+		// NOTE:  This will also die if we don't know what kind of files they are, like if they are named
+		// NOTE:  "default.txt" or "default.excel" or whatever...
+		// NOTE:  This should probably be much smoother.
+		if defaultIndex > 1 {
+			return nil, fmt.Errorf("Multiple default files found in %s", fullPath)
+		}
+
+		// Take our path and split it up into component parts.  Then iterate over them, checking each level
+		// for default files.
+		dirElements := strings.Split(path, "/")
+
+		var dirConcat string
+
+		for idx, a := range dirElements {
+			// Iterate over path elements, looking for a `default` file in each one...
+			if idx == 0 {
+				dirConcat = a
+			} else {
+				dirConcat = dirConcat + "/" + a
+			}
+
+			// Full path of the element we're currently at
+			aPath := root + "/" + dirConcat
+
+			// Does this exist?  it really should, but worse things happen at sea...
+			aPathInfo, err := os.Stat(aPath)
+			if os.IsNotExist(err) {
+				// You should never get here
+				return nil, err
+			} else {
+				if aPathInfo.IsDir() {
+					pathFiles, err := ioutil.ReadDir(aPath)
+					if err != nil {
+						return nil, err
+					}
+
+					defaultIndex := 0
+
+					for _, file := range pathFiles {
+						if file.IsDir() {
+							// skip
+						} else {
+							if file.Name() == "default" ||
+								file.Name() == "default"+filepath.Ext(file.Name()) {
+								results = append(results, aPath+"/"+file.Name())
+								if viper.GetBool("VERBOSE") {
+									log.Printf(" ... %s", aPath+"/"+file.Name())
+								}
+								defaultIndex++
+							}
+						}
+					}
+
+					if defaultIndex > 1 {
+						return nil, fmt.Errorf("Multilple default files found in %s", aPath)
+					}
+				} else {
+					// We found a file, not a directory.  You should never get here
+				}
+			}
+
+		} // end of range
+
+	} else {
+		// We want to be parsing a path.  We should be called with a root and a path and that's it.
+		err := errors.New("findDefaults called with file instead of path")
+		return nil, err
 	}
 
 	return results, nil
