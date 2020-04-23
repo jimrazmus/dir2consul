@@ -190,166 +190,166 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 			if viper.GetBool("VERBOSE") {
 				log.Printf("Skipping default file: %s...", path)
 			}
+			return nil
+		}
+
+		// We have found a file, and it's not named default, or default.<ext>
+		if viper.GetBool("VERBOSE") {
+			log.Printf("Found non-default file: %s\n    of type: %s", filepath.Base(path), filepath.Ext(path))
+		}
+		// Find default files in the paths between where we started and where this file is.
+
+		// The path of the file we have just hit.
+		pathPath := filepath.Dir(path)
+
+		// The path we started at
+		pathRoot := viper.GetString("DIRECTORY")
+
+		// Call findDefaults and generate a list of all defaults between the "root" and where we are now,
+		// including default files at the same level of the directory hierarchy as we currently are.
+		defaultList, err := findDefaults(pathPath, pathRoot)
+		if err != nil {
+			log.Printf("Error processing path %s: %s", pathRoot+"/"+pathPath, err)
+			return err
+		}
+
+		// This is the "full" path between where we started -- or the absolute root of the filesystem -- and
+		// where we are now
+		comboPath := pathRoot + "/" + path
+
+		// This should be an absolute path to the file we're at right now.
+		var pathFull string
+
+		if filepath.IsAbs(comboPath) {
+			// if the comboPath is an absolute path, set pathFull to it
+			pathFull = comboPath
 		} else {
-			// We have found a file, and it's not named default, or default.<ext>
-			if viper.GetBool("VERBOSE") {
-				log.Printf("Found non-default file: %s\n    of type: %s", filepath.Base(path), filepath.Ext(path))
-			}
-			// Find default files in the paths between where we started and where this file is.
-
-			// The path of the file we have just hit.
-			pathPath := filepath.Dir(path)
-
-			// The path we started at
-			pathRoot := viper.GetString("DIRECTORY")
-
-			// Call findDefaults and generate a list of all defaults between the "root" and where we are now,
-			// including default files at the same level of the directory hierarchy as we currently are.
-			defaultList, err := findDefaults(pathPath, pathRoot)
+			// if the comboPath is relative (ie, if the DIRECTORY environment variable is relative)
+			// construct an absolute path and assign it to pathFull
+			curWD, err := os.Getwd()
 			if err != nil {
-				log.Printf("Error processing path %s: %s", pathRoot+"/"+pathPath, err)
 				return err
 			}
 
-			// This is the "full" path between where we started -- or the absolute root of the filesystem -- and
-			// where we are now
-			comboPath := pathRoot + "/" + path
-
-			// This should be an absolute path to the file we're at right now.
-			var pathFull string
-
-			if filepath.IsAbs(comboPath) {
-				// if the comboPath is an absolute path, set pathFull to it
-				pathFull = comboPath
+			if strings.HasSuffix(curWD, pathRoot) {
+				// We already have the pathRoot in our WD
+				pathFull = curWD + "/" + path
 			} else {
-				// if the comboPath is relative (ie, if the DIRECTORY environment variable is relative)
-				// construct an absolute path and assign it to pathFull
-				curWD, err := os.Getwd()
+				err = nil
+				pathFull, err = filepath.Abs(pathPath + "/" + path)
 				if err != nil {
 					return err
 				}
+			}
+		}
 
-				if strings.HasSuffix(curWD, pathRoot) {
-					// We already have the pathRoot in our WD
-					pathFull = curWD + "/" + path
-				} else {
-					err = nil
-					pathFull, err = filepath.Abs(pathPath + "/" + path)
-					if err != nil {
-						return err
-					}
+		// Construct a list of files we care about. Start with the list of defaults we found...
+		var filesToParse []string
+
+		filesToParse = append(filesToParse, defaultList...)
+
+		// Check the type of the file we're parsing (ie, not the defaults)
+		switch filetype {
+		case "hcl", "ini", "json", "properties", "toml", "yaml", "yml":
+			// If we understand the filetype, let Viper parse it...
+			if !strings.HasPrefix(filepath.Base(path), "default") {
+				filesToParse = append(filesToParse, pathFull)
+			}
+
+			if viper.GetBool("VERBOSE") {
+				for idx, p := range filesToParse {
+					log.Printf("    %d    %s", idx, p)
 				}
 			}
 
-			// Construct a list of files we care about. Start with the list of defaults we found...
-			var filesToParse []string
+			// Load & merge all the configuration files, in order of precedence (ie, all defaults
+			// from the top of the hierarchy down to the file we are looking at, then the file
+			// we're looking at.  The results of all the properties in all those files should come
+			// to us in the viper object 'v'.
+			v, err := mergeConfiguration(filesToParse)
+			if err != nil {
+				if viper.GetBool("VERBOSE") {
+					log.Printf("Error merging configs! %s", err)
+				}
+				return nil
+			}
 
-			filesToParse = append(filesToParse, defaultList...)
+			// iterate over keys within the merged viper object, and set them in the 'kv' store
+			for _, key := range v.AllKeys() {
+				if viper.GetBool("VERBOSE") {
+					log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
+				}
+				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+			}
+		default:
+			// If we don't recognize the file's type (ie, it's something like bob.txt, instead of a
+			// proper configuration format, or it's just called 'default' with no extension...
 
-			// Check the type of the file we're parsing (ie, not the defaults)
-			switch filetype {
-			case "hcl", "ini", "json", "properties", "toml", "yaml", "yml":
-				// If we understand the filetype, let Viper parse it...
+			// If we have a DEFAULT_CONFIG_TYPE set in the environment, use that
+			defaultType := viper.GetString("DEFAULT_CONFIG_TYPE")
+
+			if defaultType != "" {
+				// if we have a default type, add the file to our "to be parsed list", as usual.
+				// mergeConfiguration will treat it as that specified default type automagically
 				if !strings.HasPrefix(filepath.Base(path), "default") {
 					filesToParse = append(filesToParse, pathFull)
-				}
-
-				if viper.GetBool("VERBOSE") {
-					for idx, p := range filesToParse {
-						log.Printf("    %d    %s", idx, p)
-					}
-				}
-
-				// Load & merge all the configuration files, in order of precedence (ie, all defaults
-				// from the top of the hierarchy down to the file we are looking at, then the file
-				// we're looking at.  The results of all the properties in all those files should come
-				// to us in the viper object 'v'.
-				v, err := mergeConfiguration(filesToParse)
-				if err != nil {
 					if viper.GetBool("VERBOSE") {
-						log.Printf("Error merging configs! %s", err)
+						log.Printf("Adding %s...", pathFull)
 					}
-					return nil
-				}
-
-				// iterate over keys within the merged viper object, and set them in the 'kv' store
-				for _, key := range v.AllKeys() {
+				} else {
 					if viper.GetBool("VERBOSE") {
-						log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
+						log.Printf("Skipping %s...", pathFull)
 					}
-					kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
-				}
-			default:
-				// If we don't recognize the file's type (ie, it's something like bob.txt, instead of a
-				// proper configuration format, or it's just called 'default' with no extension...
-
-				// If we have a DEFAULT_CONFIG_TYPE set in the environment, use that
-				defaultType := viper.GetString("DEFAULT_CONFIG_TYPE")
-
-				if defaultType != "" {
-					// if we have a default type, add the file to our "to be parsed list", as usual.
-					// mergeConfiguration will treat it as that specified default type automagically
-					if !strings.HasPrefix(filepath.Base(path), "default") {
-						filesToParse = append(filesToParse, pathFull)
-						if viper.GetBool("VERBOSE") {
-							log.Printf("Adding %s...", pathFull)
-						}
-					} else {
-						if viper.GetBool("VERBOSE") {
-							log.Printf("Skipping %s...", pathFull)
-						}
-					}
-				}
-
-				if viper.GetBool("VERBOSE") {
-					for idx, p := range filesToParse {
-						log.Printf("+++ %d    %s", idx, p)
-					}
-				}
-
-				// Load & merge all the configuration files, in order
-				// NOTE:  If we don't have a default type, this list will only be the defaults files
-				// NOTE:  Not our file of interest...
-				v, err := mergeConfiguration(filesToParse)
-				if err != nil {
-					if viper.GetBool("VERBOSE") {
-						log.Printf("Error merging configs! %s", err)
-					}
-					return nil
-				}
-
-				// iterate over keys within the merged viper configuration object
-				// NOTE:  If we don't have a default type set in the environment, this will only be a merged
-				// NOTE:  property file of all the defaults
-				for _, key := range v.AllKeys() {
-					if viper.GetBool("VERBOSE") {
-						log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
-					}
-					kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
-				}
-
-				// If we did *NOT* have a default type set, now snarf the untyped/unrecognized file into our
-				// kv set automagically as a single blob.
-				if defaultType == "" {
-					// Now that the default files are absorbed, absorb this whole file as a single property.
-					if info.Size() > 512000 {
-						if viper.GetBool("VERBOSE") {
-							log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
-						}
-						return nil
-					}
-
-					elemVal, err := ioutil.ReadFile(path)
-					if err != nil {
-						return err
-					}
-					if viper.GetBool("VERBOSE") {
-						log.Printf("%s=%s", elemKey, []byte(elemVal))
-					}
-					kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
 				}
 			}
 
+			if viper.GetBool("VERBOSE") {
+				for idx, p := range filesToParse {
+					log.Printf("+++ %d    %s", idx, p)
+				}
+			}
+
+			// Load & merge all the configuration files, in order
+			// NOTE:  If we don't have a default type, this list will only be the defaults files
+			// NOTE:  Not our file of interest...
+			v, err := mergeConfiguration(filesToParse)
+			if err != nil {
+				if viper.GetBool("VERBOSE") {
+					log.Printf("Error merging configs! %s", err)
+				}
+				return nil
+			}
+
+			// iterate over keys within the merged viper configuration object
+			// NOTE:  If we don't have a default type set in the environment, this will only be a merged
+			// NOTE:  property file of all the defaults
+			for _, key := range v.AllKeys() {
+				if viper.GetBool("VERBOSE") {
+					log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
+				}
+				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+			}
+
+			// If we did *NOT* have a default type set, now snarf the untyped/unrecognized file into our
+			// kv set automagically as a single blob.
+			if defaultType == "" {
+				// Now that the default files are absorbed, absorb this whole file as a single property.
+				if info.Size() > 512000 {
+					if viper.GetBool("VERBOSE") {
+						log.Printf("Skipping %s: size exceeds Consul's 512KB limit", elemKey)
+					}
+					return nil
+				}
+
+				elemVal, err := ioutil.ReadFile(path)
+				if err != nil {
+					return err
+				}
+				if viper.GetBool("VERBOSE") {
+					log.Printf("%s=%s", elemKey, []byte(elemVal))
+				}
+				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
+			}
 		}
 
 		return nil
