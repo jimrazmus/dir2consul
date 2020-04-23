@@ -193,10 +193,6 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 			log.Println("\n\n" + path + "\n  - " + elemKey + "\n")
 		}
 
-		// We have found a file, and it's not named default, or default.<ext>
-		if viper.GetBool("VERBOSE") {
-			log.Printf("Found non-default file: %s\n    of type: %s", filepath.Base(path), filepath.Ext(path))
-		}
 		// Find default files in the paths between where we started and where this file is.
 
 		// The path of the file we have just hit.
