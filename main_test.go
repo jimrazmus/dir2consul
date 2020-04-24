@@ -268,8 +268,8 @@ func TestMergeConfigurations(t *testing.T) {
 	}
 
 	for idx, x := range fileList {
-		x_abs := curWD + "/" + x
-		fileList[idx] = x_abs
+		xAbs := curWD + "/" + x
+		fileList[idx] = xAbs
 	}
 
 	v, err := mergeConfiguration(fileList)
