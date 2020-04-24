@@ -262,8 +262,6 @@ func TestMergeConfigurations(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	curWD, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -323,8 +321,6 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	curWD, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -370,8 +366,6 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	secondTest := "testdata/project-c/b/default"
 
 	v2, err := loadFile(curWD + "/" + secondTest)
@@ -393,7 +387,6 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
 	os.Setenv("DEFAULT_CONFIG_TYPE", "properties")
 
 	thirdTest := "testdata/project-c/b/default"
@@ -417,8 +410,6 @@ func TestLoadFile(t *testing.T) {
 
 	os.Clearenv()
 	setupEnvironment()
-
-	os.Setenv("D2C_VERBOSE", "true")
 
 	fourthTest := "testdata/project-b/repo/toobig"
 
