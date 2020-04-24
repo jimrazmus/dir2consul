@@ -520,7 +520,7 @@ func findDefaults(path string, rootProvided string) ([]string, error) {
 				}
 
 				if defaultIndex > 1 {
-					return nil, fmt.Errorf("Multilple default files found in %s", aPath)
+					return nil, fmt.Errorf("Multiple default files found in %s", aPath)
 				}
 			} else {
 				// We found a file, not a directory.  You should never get here
