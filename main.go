@@ -82,7 +82,7 @@ func setupEnvironment() {
 
 	viper.AutomaticEnv()
 
-	for key, _ := range envDefaults {
+	for key := range envDefaults {
 		err := viper.BindEnv(key)
 		if err != nil {
 			log.Fatalf("Error setting up environment: %s", err)
