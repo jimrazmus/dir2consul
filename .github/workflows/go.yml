@@ -25,6 +25,14 @@ jobs:
         run: go mod download
       - name: Format
         run: go fmt .
+      - name: Lint
+        run: |
+          go get -u golang.org/x/lint/golint
+          golint -set_exit_status ./...
+      - name: Errcheck
+        run: |
+          go get -u github.com/kisielk/errcheck
+          errcheck ./...
       - name: Test
         run: |
           go test ./...
