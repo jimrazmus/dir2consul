@@ -64,42 +64,29 @@ func main() {
 }
 
 func setupEnvironment() {
+	envDefaults := map[string]string{
+		"CONSUL_KEY_PREFIX":   "dir2consul",
+		"DEFAULT_CONFIG_TYPE": "",
+		"DIRECTORY":           "local/repo",
+		"DRYRUN":              "false",
+		"IGNORE_DIR_REGEX":    `a^`,
+		"IGNORE_FILE_REGEX":   `README.md`,
+		"VERBOSE":             "false",
+	}
+
 	viper.SetEnvPrefix("D2C")
-	viper.SetDefault("CONSUL_KEY_PREFIX", "dir2consul")
-	viper.SetDefault("DEFAULT_CONFIG_TYPE", "")
-	viper.SetDefault("DIRECTORY", "local/repo")
-	viper.SetDefault("DRYRUN", "false")
-	viper.SetDefault("IGNORE_DIR_REGEX", `a^`)
-	viper.SetDefault("IGNORE_FILE_REGEX", `README.md`)
-	viper.SetDefault("VERBOSE", "false")
+
+	for key, val := range envDefaults {
+		viper.SetDefault(key, val)
+	}
+
 	viper.AutomaticEnv()
-	err := viper.BindEnv("CONSUL_KEY_PREFIX")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("DEFAULT_CONFIG_TYPE")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("DIRECTORY")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("DRYRUN")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("IGNORE_DIR_REGEX")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("IGNORE_FILE_REGEX")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = viper.BindEnv("VERBOSE")
-	if err != nil {
-		log.Fatal(err)
+
+	for key, _ := range envDefaults {
+		err := viper.BindEnv(key)
+		if err != nil {
+			log.Fatalf("Error setting up environment: %s", err)
+		}
 	}
 }
 
