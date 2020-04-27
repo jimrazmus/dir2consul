@@ -49,7 +49,10 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, consulKVPair := range consulKVPairs {
-		consulKeyValues.Set(consulKVPair.Key, consulKVPair.Value)
+		_, _, err = consulKeyValues.Set(consulKVPair.Key, consulKVPair.Value)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Add or update data in Consul when it doesn't match the file data
@@ -61,22 +64,30 @@ func main() {
 }
 
 func setupEnvironment() {
+	envDefaults := map[string]string{
+		"CONSUL_KEY_PREFIX":   "dir2consul",
+		"DEFAULT_CONFIG_TYPE": "",
+		"DIRECTORY":           "local/repo",
+		"DRYRUN":              "false",
+		"IGNORE_DIR_REGEX":    `a^`,
+		"IGNORE_FILE_REGEX":   `README.md`,
+		"VERBOSE":             "false",
+	}
+
 	viper.SetEnvPrefix("D2C")
-	viper.SetDefault("CONSUL_KEY_PREFIX", "dir2consul")
-	viper.SetDefault("DEFAULT_CONFIG_TYPE", "")
-	viper.SetDefault("DIRECTORY", "local/repo")
-	viper.SetDefault("DRYRUN", "false")
-	viper.SetDefault("IGNORE_DIR_REGEX", `a^`)
-	viper.SetDefault("IGNORE_FILE_REGEX", `README.md`)
-	viper.SetDefault("VERBOSE", "false")
+
+	for key, val := range envDefaults {
+		viper.SetDefault(key, val)
+	}
+
 	viper.AutomaticEnv()
-	viper.BindEnv("CONSUL_KEY_PREFIX")
-	viper.BindEnv("DEFAULT_CONFIG_TYPE")
-	viper.BindEnv("DIRECTORY")
-	viper.BindEnv("DRYRUN")
-	viper.BindEnv("IGNORE_DIR_REGEX")
-	viper.BindEnv("IGNORE_FILE_REGEX")
-	viper.BindEnv("VERBOSE")
+
+	for key := range envDefaults {
+		err := viper.BindEnv(key)
+		if err != nil {
+			log.Fatalf("Error setting up environment: %s", err)
+		}
+	}
 }
 
 func startupMessage() string {
@@ -275,7 +286,10 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				if viper.GetBool("VERBOSE") {
 					log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
 				}
-				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+				_, _, err = kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		default:
 			// If we don't recognize the file's type (ie, it's something like bob.txt, instead of a
@@ -323,7 +337,10 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				if viper.GetBool("VERBOSE") {
 					log.Printf("%s=%s", elemKey+"/"+key, v.GetString(key))
 				}
-				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+				_, _, err = kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey+"/"+key, []byte(v.GetString(key)))
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			// If we did *NOT* have a default type set, now snarf the untyped/unrecognized file into our
@@ -344,7 +361,10 @@ func loadKeyValuesFromDisk(kv *kv.List, dirIgnoreRe *regexp.Regexp, fileIgnoreRe
 				if viper.GetBool("VERBOSE") {
 					log.Printf("%s=%s", elemKey, []byte(elemVal))
 				}
-				kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
+				_, _, err = kv.Set(viper.GetString("CONSUL_KEY_PREFIX")+"/"+elemKey, elemVal)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 
@@ -520,7 +540,7 @@ func findDefaults(path string, rootProvided string) ([]string, error) {
 				}
 
 				if defaultIndex > 1 {
-					return nil, fmt.Errorf("Multilple default files found in %s", aPath)
+					return nil, fmt.Errorf("Multiple default files found in %s", aPath)
 				}
 			} else {
 				// We found a file, not a directory.  You should never get here

@@ -42,12 +42,18 @@ func TestSetupEnvironment(t *testing.T) {
 
 func TestStartupMessage(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("TEST", "TestStartupMessage")
+	err := os.Setenv("TEST", "TestStartupMessage")
+	if err != nil {
+		t.Fatal(err)
+	}
 	setupEnvironment()
 	actual := []byte(startupMessage())
 	auFile := "testdata/TestStartupMessage.golden"
 	if *update {
-		ioutil.WriteFile(auFile, actual, 0644)
+		err = ioutil.WriteFile(auFile, actual, 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	golden, err := ioutil.ReadFile(auFile)
 	if err != nil {
@@ -138,7 +144,10 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			os.Setenv("D2C_VERBOSE", "true")
+			err = os.Setenv("D2C_VERBOSE", "true")
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			var dirIgnoreRe, fileIgnoreRe *regexp.Regexp
 			dirIgnoreRe, err = regexp.Compile(tc.dre)
@@ -153,7 +162,12 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer os.Chdir(old)
+			defer func() {
+				err := os.Chdir(old)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}()
 
 			actual := kv.NewList()
 			err = loadKeyValuesFromDisk(actual, dirIgnoreRe, fileIgnoreRe)
@@ -166,7 +180,10 @@ func TestLoadKeyValuesFromDisk(t *testing.T) {
 			}
 			auFile := fmt.Sprintf("testdata/%s.golden", tc.name)
 			if *update {
-				ioutil.WriteFile(auFile, actual.Serialize(), 0644)
+				err = ioutil.WriteFile(auFile, actual.Serialize(), 0644)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 			golden, err := ioutil.ReadFile(auFile)
 			if err != nil {
@@ -262,16 +279,14 @@ func TestMergeConfigurations(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	curWD, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for idx, x := range fileList {
-		x_abs := curWD + "/" + x
-		fileList[idx] = x_abs
+		xAbs := curWD + "/" + x
+		fileList[idx] = xAbs
 	}
 
 	v, err := mergeConfiguration(fileList)
@@ -323,8 +338,6 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	curWD, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -370,8 +383,6 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-
 	secondTest := "testdata/project-c/b/default"
 
 	v2, err := loadFile(curWD + "/" + secondTest)
@@ -393,8 +404,10 @@ func TestLoadFile(t *testing.T) {
 	os.Clearenv()
 	setupEnvironment()
 
-	os.Setenv("D2C_VERBOSE", "true")
-	os.Setenv("DEFAULT_CONFIG_TYPE", "properties")
+	err = os.Setenv("DEFAULT_CONFIG_TYPE", "properties")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	thirdTest := "testdata/project-c/b/default"
 
@@ -417,8 +430,6 @@ func TestLoadFile(t *testing.T) {
 
 	os.Clearenv()
 	setupEnvironment()
-
-	os.Setenv("D2C_VERBOSE", "true")
 
 	fourthTest := "testdata/project-b/repo/toobig"
 
