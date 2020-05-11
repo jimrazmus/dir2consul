@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jimrazmus/dir2consul/kv"
+	"github.com/code42/dir2consul/kv"
 	"github.com/spf13/viper"
 )
 

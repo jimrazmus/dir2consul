@@ -1,4 +1,4 @@
-module github.com/jimrazmus/dir2consul
+module github.com/code42/dir2consul
 
 go 1.14
 
