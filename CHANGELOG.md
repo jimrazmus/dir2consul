@@ -1,10 +1,54 @@
-<a name="unreleased"></a>
-## [Unreleased]
+# Change Log
 
+## [Unreleased](#unreleased)
 
-<a name="v1.5.0"></a>
-## [v1.5.0] - 2020-04-22
 ### Build
+
+- add markdown lint config
+- include linting and errcheck in workflow
+- fix docker version
+- add missing error checks
+- Set Golang env variables in workflow
+- appease golint
+- add missing error checks
+- make testing less verbose
+- **deps:** bump github.com/spf13/viper from 1.6.3 to 1.7.0
+- **deps:** bump github.com/spf13/viper from 1.7.0 to 1.7.1
+- **deps:** bump github.com/hashicorp/consul/api from 1.5.0 to 1.6.0
+- **deps:** bump actions/setup-go from v1 to v2.1.2
+- **deps:** bump golang from 1.14.0-alpine3.11 to 1.14.7-alpine3.11
+- **deps:** bump github.com/hashicorp/consul/api from 1.6.0 to 1.7.0
+- **deps:** bump github.com/hashicorp/consul/api from 1.4.0 to 1.5.0
+
+### Chore
+
+- update golang and libs
+- fix file name
+- add dependabot configuration
+- fix spelling
+
+### Docs
+
+- add markdown linting, fix minor lint issues
+
+### Fix
+
+- s/jimrazmus/code42/
+- appease linter
+- use loops to eliminate repetition
+- less nesting
+- less nesting
+- appease linter
+- remove redundant logging
+- move default file skipping adjacent to other skipping
+- less nesting
+- remove extraneous comment
+- remove redundant IsDir check
+
+## [v1.5.0](#v1.5.0) - 2020-04-22
+
+### Build
+
 - revert attempt to parameterize go-version It doesn't work.
 - parameterize go-version
 - improve readability
@@ -19,46 +63,56 @@
 - **deps:** bump github.com/spf13/viper from 1.6.2 to 1.6.3
 
 ### Chore
+
+- release new version
 - use 'standard' docker image labels ([#28](https://github.com/jimrazmus/dir2consul/issues/28))
 
 ### Docs
+
 - dir2consul in now a Code42 OS project
 
 ### Feat
+
 - Add processing of the "default" functionality ([#23](https://github.com/jimrazmus/dir2consul/issues/23))
 
 ### Pull Requests
+
 - Merge pull request [#30](https://github.com/jimrazmus/dir2consul/issues/30) from code42/improve-publish
 - Merge pull request [#29](https://github.com/jimrazmus/dir2consul/issues/29) from code42/goodbye-packages
 - Merge pull request [#21](https://github.com/jimrazmus/dir2consul/issues/21) from code42/dependabot/go_modules/github.com/spf13/viper-1.6.3
 
+## [v1.4.1](#v1.4.1) - 2020-03-19
 
-<a name="v1.4.1"></a>
-## [v1.4.1] - 2020-03-19
 ### Chore
+
 - update changelog
 
 ### Fix
+
 - Remove the D2C_ prefix from viper calls
 
 ### Refactor
+
 - rm unused files.
 
 ### Pull Requests
+
 - Merge pull request [#19](https://github.com/jimrazmus/dir2consul/issues/19) from jimrazmus/fix-config
 
+## [v1.4.0](#v1.4.0) - 2020-03-17
 
-<a name="v1.4.0"></a>
-## [v1.4.0] - 2020-03-17
 ### Build
+
 - include modules in coverage check
 - Remove debug logic. Use IDE debugger.
 
 ### Chore
+
 - update changelog
 - update and tidy modules
 
 ### Docs
+
 - reference version 1.4.0
 - use quotes consistently
 - add link to regex docs
@@ -66,53 +120,63 @@
 - dry run requires v1.3.0
 
 ### Feat
+
 - Switch to Viper and add verbose option.
 
 ### Refactor
+
 - mv consul mutation to functions for future testing
 - make function private
 - relocate chdir for better context
 - Seperate and test regex compilation
 
 ### Pull Requests
+
 - Merge pull request [#18](https://github.com/jimrazmus/dir2consul/issues/18) from jimrazmus/overhaul
 - Merge pull request [#17](https://github.com/jimrazmus/dir2consul/issues/17) from jimrazmus/delete-debug
 
+## [v1.3.0](#v1.3.0) - 2020-03-11
 
-<a name="v1.3.0"></a>
-## [v1.3.0] - 2020-03-11
 ### Chore
+
 - delete unused makefile
 
 ### Docs
+
 - Make README more usable.
 
 ### Feat
+
 - Add dry run capability. Closes [#15](https://github.com/jimrazmus/dir2consul/issues/15)
 
 ### Pull Requests
+
 - Merge pull request [#16](https://github.com/jimrazmus/dir2consul/issues/16) from jimrazmus/dry-run
 
+## [v1.2.0](#v1.2.0) - 2020-03-10
 
-<a name="v1.2.0"></a>
-## [v1.2.0] - 2020-03-10
 ### Build
+
 - switch to push only ci
 - update ci to use golang 1.14
 
 ### Chore
+
 - add changelog
 - go get -u && go mod tidy
 
 ### Docs
+
 - Note the new default skip logic.
 - fix formatting of regexs
 
 ### Feat
+
 - skip hidden dirs and files
 - update to golang 1.14.0
 
 ### Test
+
 - Revise test fixtures for skip feature
 - Revise tests for skipping feature
 - add test for big files
@@ -126,46 +190,50 @@
 - add an ugly serializer function to support other testing
 
 ### Pull Requests
+
 - Merge pull request [#14](https://github.com/jimrazmus/dir2consul/issues/14) from jimrazmus/skip-hidden
 - Merge pull request [#13](https://github.com/jimrazmus/dir2consul/issues/13) from jimrazmus/test-big-file
 - Merge pull request [#11](https://github.com/jimrazmus/dir2consul/issues/11) from jimrazmus/add-testing
 - Merge pull request [#12](https://github.com/jimrazmus/dir2consul/issues/12) from jimrazmus/update-ci
 
+## [v1.1.0](#v1.1.0) - 2020-02-24
 
-<a name="v1.1.0"></a>
-## [v1.1.0] - 2020-02-24
 ### Feat
+
 - Use regexp for ignore functions.
 
 ### Pull Requests
+
 - Merge pull request [#10](https://github.com/jimrazmus/dir2consul/issues/10) from jimrazmus/better-ignore
 
+## [v1.0.1](#v1.0.1) - 2020-02-24
 
-<a name="v1.0.1"></a>
-## [v1.0.1] - 2020-02-24
 ### Fix
+
 - Docker copy missed subdirs.
 
+## [v1.0.0](#v1.0.0) - 2020-02-24
 
-<a name="v1.0.0"></a>
-## v1.0.0 - 2020-02-24
 ### Build
+
 - Add labels to the docker image.
 
 ### Docs
+
 - Add Go Report badge.
 - Add contributing and licensing verbiage.
 
 ### Fix
+
 - Be consistent with key prefix.
 - Prevent exceeding Consul size limit.
 
 ### Pull Requests
+
 - Merge pull request [#9](https://github.com/jimrazmus/dir2consul/issues/9) from jimrazmus/use-consul-api
 - Merge pull request [#8](https://github.com/jimrazmus/dir2consul/issues/8) from jimrazmus/stop-large-values
 - Merge pull request [#7](https://github.com/jimrazmus/dir2consul/issues/7) from jimrazmus/add-consul-kv-functions
 - Merge pull request [#1](https://github.com/jimrazmus/dir2consul/issues/1) from jimrazmus/simple
-
 
 [Unreleased]: https://github.com/jimrazmus/dir2consul/compare/v1.5.0...HEAD
 [v1.5.0]: https://github.com/jimrazmus/dir2consul/compare/v1.4.1...v1.5.0
