@@ -35,7 +35,7 @@ Read more about [regular expression syntax](https://github.com/google/re2/wiki/S
 
 The following command does a dry run of mirroring the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
 
-```
+```bash
 docker run -v $(PWD):/local \
   --env CONSUL_HTTP_ADDR=consul.example.com:8500 \
   --env D2C_CONSUL_KEY_PREFIX=some/specific/kv/path \
@@ -53,4 +53,4 @@ Jim Razmus II
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
