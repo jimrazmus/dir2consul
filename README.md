@@ -31,7 +31,13 @@ Consul specific configuration variables are documented [here](https://www.consul
 
 Read more about [regular expression syntax](https://github.com/google/re2/wiki/Syntax) to get the desired behavior with the D2C_IGNORE_DIR_REGEX and D2C_IGNORE_FILE_REGEX configuration options.
 
-## Running with Docker
+## Installation
+
+dir2consul requires no installation. It ships as a Docker container.
+
+## Usage
+
+### Running with Docker
 
 The following command does a dry run of mirroring the present working directory (PWD) to the Consul server KV store under the path "some/specific/kv/path".
 
