@@ -1,4 +1,5 @@
-dir2consul/repo/README : readme file
+dir2consul/repo/README : # readme file
+
 dir2consul/repo/a/a : a
 dir2consul/repo/a/test-text : a
 dir2consul/repo/b/b : b
