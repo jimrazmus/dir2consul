@@ -20,7 +20,7 @@ jobs:
         with:
           go-version: 1.15.5
       - name: Check out Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       - name: Get dependencies
         run: go mod download
       - name: Format
@@ -47,7 +47,7 @@ jobs:
         with:
           go-version: 1.15.5
       - name: Check out Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       - name: Measure Coverage
         run: go test -v -covermode=atomic -coverprofile=coverage.out ./...
       - name: Upload Coverage to Codecov
@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: Check out Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DockerHubToken }}" | docker login -u ${{ secrets.DockerHubUsername }} --password-stdin
       - name: Build and Push Docker Image
