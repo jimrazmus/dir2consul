@@ -9,5 +9,5 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.2.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
-	github.com/spf13/viper v1.8.0
+	github.com/spf13/viper v1.8.1
 )
